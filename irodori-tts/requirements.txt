@@ -1,5 +1,7 @@
 # Common runtime dependencies for wrapper/tts_cli.py
 alkana==0.0.3
+# 口パクのタイムライン（/irodori/timeline）で使うASR。モデル本体は初回利用時に取得する。
+sherpa-onnx>=1.12,<2
 # Keep torch/torchvision/torchaudio on a version-compatible triplet.
 # transformers 5.x requires torch 2.5+, and the matching torchvision
 # line is 0.20.x with torchaudio 2.5.x.

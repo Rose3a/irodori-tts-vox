@@ -26,8 +26,13 @@ from speaker_catalog import (
     portrait_for,
     speaker_catalog,
 )
-from asr_timeline import AsrTimeline, decode_wav, MODEL_DIR as ASR_MODEL_DIR
+from asr_timeline import (AsrTimeline, decode_wav, ensure_asr_model, asr_package_error,
+                          MODEL_DIR as ASR_MODEL_DIR)
 from tts_cli import SpeakerCassette, resolve_embed_dirs
+
+# 初回のASRモデル取得でリクエストを待たせる上限（秒）。待ち切れなくても
+# ダウンロードは続くので、次の要求で揃っていれば使える。
+ASR_DOWNLOAD_WAIT_SECONDS = float(os.environ.get("IRODORI_ASR_WAIT_SECONDS", "45"))
 
 BOX_ROOT = ROOT.parent
 MODEL_DIR = Path(os.environ.get("IRODORI_MODEL_DIR", str(BOX_ROOT / "models")))
@@ -487,8 +492,22 @@ class EditorAdapter:
         if MAX_TEXT_CHARS and len(text) > MAX_TEXT_CHARS:
             raise ValueError(f"text is too long: {len(text)} > {MAX_TEXT_CHARS}")
         if not self.timeline_reader.available:
-            return {"available": False, "reason": "ASR model is not installed",
-                    "modelFolder": str(ASR_MODEL_DIR), "text": text}
+            # 初回利用時にモデルを取得する。待ち切れなくても取得は続くので、
+            # 次の要求（もう一度読み込む等）で揃っていれば使える。
+            if os.environ.get("IRODORI_ASR_AUTO_DOWNLOAD", "1") != "0":
+                state = ensure_asr_model(progress=self._set_progress, log=self._runtime_log,
+                                         wait_seconds=ASR_DOWNLOAD_WAIT_SECONDS)
+                if not state["ready"]:
+                    if state["pending"]:
+                        reason = "ASR model is downloading"
+                        self._runtime_log("asr timeline: waiting for the ASR model download")
+                    else:
+                        reason = f"ASR model is not installed ({state['error'] or 'download failed'})"
+                    return {"available": False, "reason": reason, "downloading": state["pending"],
+                            "modelFolder": str(ASR_MODEL_DIR), "text": text}
+            else:
+                return {"available": False, "reason": "ASR model is not installed",
+                        "modelFolder": str(ASR_MODEL_DIR), "text": text}
         payload = value.get("wav")
         speaker_name = value.get("speaker")
         if payload:
@@ -500,7 +519,10 @@ class EditorAdapter:
             speaker_name = speaker_name or cached[2]
             raw = cached[3]
         samples = decode_wav(raw)
-        result = self.timeline_reader.anchors(text, samples)
+        try:
+            result = self.timeline_reader.anchors(text, samples)
+        except ImportError as exc:
+            raise ValueError(asr_package_error()) from exc
         result["available"] = True
         result["speaker"] = speaker_name
         result["source"] = "cached" if not payload else "request"

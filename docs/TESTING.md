@@ -60,6 +60,22 @@ Vite 開発サーバー（`bat\serve_browser.bat`）とエンジンを起動し�
 3. ブラウザで http://127.0.0.1:5173/ を開く
 ```
 
+## 口パク用ASR（/irodori/timeline）
+
+初回の呼び出しでエンジンがモデル（約626MB）を `models\asr` へ自動取得する。
+手で確認する手順は次のとおり。
+
+```text
+1. エンジンを起動して 1 行合成する（WAV がエンジンのキャッシュに入る）
+2. POST /irodori/timeline に {"text": "..."} を送る
+   - 取得が終わっていれば anchors が返る
+   - 取得中なら available=false と downloading=true が返るので、
+     少し待って再送する（取得はエンジン側で続いている）
+```
+
+`logs\browser-engine.log` に `ASR model download:` の行が出る。モデルを先に置いて
+おけば取得は走らず、`IRODORI_ASR_AUTO_DOWNLOAD=0` で自動取得を止められる。
+
 エンジンとエディタのポート、`voicevox-editor\.env` の `VITE_DEFAULT_ENGINE_INFOS` の
 `host`、エンジン側の許可オリジン（`irodori-tts\wrapper\voicevox_engine.py` の
 `ALLOWED_ORIGINS`）を揃えること。ずれているとエンジンに接続できない。

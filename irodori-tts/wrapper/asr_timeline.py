@@ -5,7 +5,8 @@
 「どの文字がいつ発話されたか」を実測してタイムラインの基準にする。
 
 - ASR はあくまで時刻の取得用。文字の対応は入力セリフ（既知）を正とする。
-- モデルが無い／読めないときは available=False を返し、呼び出し側は推定へ戻す。
+- モデルが無いときは初回利用時に自動で取得する（`ensure_asr_model`）。
+  取得に失敗した場合だけ available=False を返し、呼び出し側は推定へ戻す。
 """
 from __future__ import annotations
 
@@ -23,6 +24,104 @@ BOX_ROOT = ROOT.parent
 MODEL_DIR = Path(os.environ.get("IRODORI_ASR_DIR", str(BOX_ROOT / "models" / "asr")))
 MODEL_FILE = MODEL_DIR / "model.int8.onnx"
 TOKENS_FILE = MODEL_DIR / "tokens.txt"
+
+# 初回利用時に取得するモデル（sherpa-onnx の Parakeet TDT CTC 0.6B JA int8）。
+# 取得元はリビジョン固定。差し替えたいときは環境変数で上書きする。
+ASR_REPO = os.environ.get(
+    "IRODORI_ASR_REPO",
+    "csukuangfj/sherpa-onnx-nemo-parakeet-tdt_ctc-0.6b-ja-35000-int8")
+ASR_REVISION = os.environ.get(
+    "IRODORI_ASR_REVISION",
+    "bef18eb066808c90bd0f5df5be685767b0732de8")
+ASR_FILES = {"model.int8.onnx": 655_542_604, "tokens.txt": 28_557}
+
+_download_lock = threading.Lock()
+_download_thread: threading.Thread | None = None
+_download_error: str | None = None
+
+
+def model_ready(folder: Path | None = None, files: dict | None = None) -> bool:
+    """必要なファイルが想定サイズで揃っているか。"""
+    folder = Path(folder or MODEL_DIR)
+    files = files or ASR_FILES
+    for name, size in files.items():
+        target = folder / name
+        if not target.is_file() or target.stat().st_size != size:
+            return False
+    return True
+
+
+def _fetch(folder: Path, files: dict, progress=None, log=None) -> None:
+    from huggingface_hub import hf_hub_download
+
+    folder.mkdir(parents=True, exist_ok=True)
+    total = len(files)
+    for index, (name, size) in enumerate(files.items(), start=1):
+        target = folder / name
+        if target.is_file() and target.stat().st_size == size:
+            continue
+        percent = int(5 + 80 * (index - 1) / max(total, 1))
+        if progress:
+            progress(f"ASRモデルを取得中: {name}", percent)
+        if log:
+            log(f"ASR model download: {name} ({size} bytes) from {ASR_REPO}@{ASR_REVISION[:12]}")
+        hf_hub_download(ASR_REPO, name, revision=ASR_REVISION, local_dir=str(folder))
+        actual = target.stat().st_size if target.is_file() else 0
+        if actual != size:
+            raise RuntimeError(
+                f"{name} のサイズが想定と違います（{actual} != {size}）。取得をやり直してください")
+    if progress:
+        progress("ASRモデルの取得完了", 90)
+
+
+def ensure_asr_model(progress=None, log=None, wait_seconds: float = 0.0,
+                     folder: Path | None = None, files: dict | None = None) -> dict:
+    """モデルが無ければ取得する。
+
+    ダウンロードは専用スレッドで走らせ、`wait_seconds` 秒だけ待って状態を返す。
+    待ち切れなくても取得は続くので、次の呼び出しで揃っていれば使える。
+    """
+    global _download_thread, _download_error
+
+    folder = Path(folder or MODEL_DIR)
+    files = files or ASR_FILES
+    if model_ready(folder, files):
+        return {"ready": True, "pending": False, "error": None, "folder": str(folder)}
+
+    with _download_lock:
+        if _download_thread is None or not _download_thread.is_alive():
+            _download_error = None
+
+            def run():
+                global _download_error
+                try:
+                    _fetch(folder, files, progress, log)
+                except Exception as exc:  # noqa: BLE001
+                    _download_error = str(exc)
+                    if log:
+                        log(f"ASR model download failed: {exc}")
+                    if progress:
+                        progress("ASRモデルの取得に失敗", 0, False)
+
+            _download_thread = threading.Thread(target=run, name="asr-model-fetch", daemon=True)
+            _download_thread.start()
+        thread = _download_thread
+
+    if wait_seconds:
+        thread.join(timeout=float(wait_seconds))
+    ready = model_ready(folder, files)
+    if ready and progress:
+        progress("ASRモデルの取得完了", 100, False)
+    return {"ready": ready, "pending": thread.is_alive(), "error": _download_error,
+            "folder": str(folder)}
+
+
+def asr_package_error() -> str:
+    """sherpa-onnx 未導入時に出す案内。"""
+    return ("sherpa-onnx が入っていません。"
+            "uv pip install --python .local\\venv\\Scripts\\python.exe -r tools\\requirements-asr.txt "
+            "を実行してから、もう一度読み込んでください")
+
 
 SAMPLE_RATE = 16000
 FRAME_SECONDS = 0.08  # FastConformer の 8x サブサンプリング（10ms hop）

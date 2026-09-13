@@ -1,0 +1,9 @@
+# 口パクのタイムライン（/irodori/timeline）で使うASRの依存。
+#
+# モデル本体（model.int8.onnx と tokens.txt、合計約626MB）は初回利用時に
+# エンジンが自動取得して models\asr に置くので、ここでは入れない。
+#
+#   uv pip install --python .local\venv\Scripts\python.exe -r tools\requirements-asr.txt
+#
+# bat\first_setup.bat の環境には requirements-app.txt 経由で既に入っている。
+sherpa-onnx>=1.12,<2

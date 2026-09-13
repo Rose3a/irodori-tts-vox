@@ -25,13 +25,19 @@ Torchで追加した話者をTensorRT用に変換する作業は不要。Torch�
 
 TensorRTのplan自体はGPU・TensorRTバージョン依存なので、話者追加では再構築不要だが、モデル本体を交換した場合はplanを作り直す。
 
-## 口パク用のASRモデル（任意）
+## 口パク用のASRモデル（初回利用時に自動取得）
 
-`/irodori/timeline` はセリフ文字ごとの発話時刻を作るために、sherpa-onnx 形式のオフラインASRを使う。モデルは配布物に含まれないので、使う場合だけ次を置く。
+`/irodori/timeline` はセリフ文字ごとの発話時刻を作るために、sherpa-onnx 形式のオフラインASRを使う。モデルは配布物に含まれず、**初回利用時にエンジンが自動で取得**して次へ置く。
 
 ```text
 models/asr/model.int8.onnx
 models/asr/tokens.txt
 ```
 
-sherpa-onnx が配布するオフライン認識モデル（Parakeet TDT 系の int8 変換など、`model.int8.onnx` と `tokens.txt` を持つもの）を入手して配置する。フォルダを変える場合は `IRODORI_ASR_DIR` を設定する。ファイルが無い場合、この機能は「利用不可」を返すだけで、音声生成そのものは動く。
+- 取得元は `irodori-tts/wrapper/asr_timeline.py` の `ASR_REPO` / `ASR_REVISION`（リビジョン固定）。`IRODORI_ASR_REPO` / `IRODORI_ASR_REVISION` で上書きできる。
+- 665MB ほどあるので、初回の要求は取得を待って 45 秒で切り上げる（`IRODORI_ASR_WAIT_SECONDS`）。待ち切れても取得は続くので、もう一度読み込むと揃っている。
+- 進捗はエンジンの進捗表示とログに出る。手動で置いてもよい（フォルダを変える場合は `IRODORI_ASR_DIR`）。
+- 取得を止めたい場合は `IRODORI_ASR_AUTO_DOWNLOAD=0`。
+- 認識器の依存は `sherpa-onnx`。セットアップ環境には `tools/requirements-app.txt` 経由で入る。入っていない環境では
+  `uv pip install --python .local\venv\Scripts\python.exe -r tools\requirements-asr.txt` を実行する。
+- モデルが無い場合、この機能は「利用不可」を返すだけで、音声生成そのものは動く。

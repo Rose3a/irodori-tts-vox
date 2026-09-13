@@ -14,6 +14,7 @@ import base64
 import json
 import subprocess
 import sys
+import tempfile
 import time
 import urllib.request
 from pathlib import Path
@@ -24,8 +25,8 @@ CHROME = r"C:\Program Files\Google\Chrome\Application\chrome.exe"
 APP = "http://127.0.0.1:5173/"
 ENGINE = "http://127.0.0.1:50125"
 PORT = 9333
-PROFILE = Path(r"C:\Users\rose\AppData\Local\Temp\chrome-cdp-verify")
-OUT = Path(r"D:\hermes\irodori-tts-box\logs")
+PROFILE = Path(tempfile.gettempdir()) / "chrome-cdp-verify"
+OUT = Path(__file__).resolve().parents[1] / "logs"
 
 
 def http_json(url: str):
