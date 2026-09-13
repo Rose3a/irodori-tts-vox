@@ -18,7 +18,14 @@ from urllib.parse import urlparse, parse_qs
 
 from voicevox_engine import (Handler, VoicevoxAdapter, ROOT, ENGINE_UUID_NAMESPACE,
                               TINY_PNG, _query, SESSION_TOKEN, MAX_BODY_BYTES, MAX_TEXT_CHARS)
-from speaker_catalog import speaker_catalog, portrait_for, mouth_open_thumbnail_for, blink_thumbnail_for, mouth_parts_for
+from speaker_catalog import (
+    _fallback_icon,
+    blink_thumbnail_for,
+    mouth_open_thumbnail_for,
+    mouth_parts_for,
+    portrait_for,
+    speaker_catalog,
+)
 from asr_timeline import AsrTimeline, decode_wav, MODEL_DIR as ASR_MODEL_DIR
 from tts_cli import SpeakerCassette, resolve_embed_dirs
 
@@ -623,6 +630,8 @@ class EditorAdapter:
             id_to_name = {0: ""}
             speakers_json = []
             catalog = dict(speaker_catalog(cassette.dirs))
+            fallback = _fallback_icon()
+            fallback_payload = fallback[1] if fallback else TINY_PNG
             for name in [""] + names:
                 uid = uuid.uuid5(ENGINE_UUID_NAMESPACE, name or "no-speaker")
                 sid = (uid.int % (2**31 - 1)) if name else 0
@@ -631,7 +640,7 @@ class EditorAdapter:
                 id_to_name[sid] = name
                 label = name or "話者なし"
                 image = catalog.get(name)
-                encoded = image[1] if image else TINY_PNG
+                encoded = image[1] if image else fallback_payload
                 source = cassette.path_for(name) if name else None
                 portrait = portrait_for(source) if source else None
                 mouth = mouth_open_thumbnail_for(source) if source else None
