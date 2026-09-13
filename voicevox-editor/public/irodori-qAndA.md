@@ -1,4 +1,4 @@
-# Irodori-TTS Box について
+# Irodori-TTS Vox について
 
 ## Q. この画面はVOICEVOX本体ですか？
 

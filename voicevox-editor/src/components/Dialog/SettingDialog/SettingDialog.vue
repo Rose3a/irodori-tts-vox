@@ -65,7 +65,7 @@
               </div>
               <!-- Irodori runtime card -->
               <div class="setting-card">
-                <h5 class="headline">Irodori-TTS Box の動作設定</h5>
+                <h5 class="headline">Irodori-TTS Vox の動作設定</h5>
                 <IrodoriGlobalSettings
                   v-for="engineId in store.state.engineIds"
                   :key="engineId"
@@ -352,10 +352,10 @@
                 <h5 class="headline">互換機能</h5>
                 <BaseRowCard
                   title="本家エディタ向け機能"
-                  description="アクセント辞書、モーフィング、歌唱、マルチエンジン、利用状況データ送信は、このIrodori-TTS Boxでは利用しません。"
+                  description="アクセント辞書、モーフィング、歌唱、マルチエンジン、利用状況データ送信は、この Irodori-TTS Vox では利用しません。"
                 />
               </div>
-              <!-- Original upstream settings are intentionally hidden in Irodori-TTS Box. -->
+              <!-- Original upstream settings are intentionally hidden in Irodori-TTS Vox. -->
               <div v-show="false" class="setting-card">
                 <h5 class="headline">高度な設定</h5>
                 <ToggleCell

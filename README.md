@@ -1,4 +1,4 @@
-# Irodori TTS Box
+# Irodori TTS Vox
 
 Windows 向けの Irodori-TTS 実行環境と、Irodori 対応 VOICEVOX Editor をまとめるためのソースリポジトリです。GPU を自動判定して CUDA、DirectML (Radeon)、または CPU バックエンドを構成します。
 
