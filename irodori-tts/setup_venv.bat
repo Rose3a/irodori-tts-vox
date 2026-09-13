@@ -16,6 +16,8 @@ if /i "%~1"=="--no-pause" set "PAUSE_AT_END=0"
 rem Set this outside parenthesized blocks so cmd expands it correctly.
 if "%TORCH_INDEX_URL%"=="" set "TORCH_INDEX_URL=https://download.pytorch.org/whl/cu128"
 set "MODEL_ID=Aratako/Irodori-TTS-v4.1-Small"
+rem Pin the checkpoint so a later re-run cannot pick up different weights.
+if "%MODEL_REVISION%"=="" set "MODEL_REVISION=2b28324dc263ed5e6638b3cf3dd94c82ead07b4b"
 set "MODEL_DIR=%ROOT%models"
 set "RUNTIME_DIR=%ROOT%runtime"
 set "TRT_LAB_DIR=%RUNTIME_DIR%\trt-lab"
@@ -131,7 +133,7 @@ if errorlevel 1 goto :failed
 
 echo [info] installing DACVAE codec without conflicting dependency resolution
 >>"%LOG%" echo Command: "%VENV_PY%" -m pip install --no-deps dacvae
-"%VENV_PY%" -m pip install --upgrade --no-deps "dacvae @ https://github.com/facebookresearch/dacvae/archive/refs/heads/main.zip" >>"%LOG%" 2>&1
+"%VENV_PY%" -m pip install --upgrade --no-deps "dacvae @ https://github.com/facebookresearch/dacvae/archive/414c20785fc3a28373073ea8ef7a1316eeeaca6e.zip" >>"%LOG%" 2>&1
 if errorlevel 1 goto :failed
 
 echo [info] aligning protobuf for ONNX/TensorRT export
@@ -151,7 +153,7 @@ if not exist "%MODEL_DIR%\model.safetensors" (
     echo [info] downloading model: %MODEL_ID%
     mkdir "%MODEL_DIR%" >nul 2>&1
     >>"%LOG%" echo Command: Hugging Face snapshot_download %MODEL_ID%
-    "%VENV_PY%" -c "from huggingface_hub import snapshot_download; snapshot_download(repo_id='%MODEL_ID%', local_dir=r'%MODEL_DIR%')" >>"%LOG%" 2>&1
+    "%VENV_PY%" -c "from huggingface_hub import snapshot_download; snapshot_download(repo_id='%MODEL_ID%', revision='%MODEL_REVISION%', local_dir=r'%MODEL_DIR%')" >>"%LOG%" 2>&1
     if errorlevel 1 goto :failed
 ) else (
     echo [info] model already exists: %MODEL_DIR%\model.safetensors

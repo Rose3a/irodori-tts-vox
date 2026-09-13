@@ -142,7 +142,10 @@ try {
         $radeonPython = Join-Path $radeonVenv 'Scripts\python.exe'
         Run-Uv @('pip','install','--python',$radeonPython,'torch-directml','onnxruntime-directml','numpy','safetensors','einops')
     }
-    Run-Uv @('pip','install','--python',$python,'--no-deps','dacvae @ https://github.com/facebookresearch/dacvae/archive/refs/heads/main.zip')
+    # Install a pinned DACVAE revision: this package comes from a git archive
+    # rather than a release, so a moving branch would silently change the
+    # exported codec. Bump the commit hash deliberately.
+    Run-Uv @('pip','install','--python',$python,'--no-deps','dacvae @ https://github.com/facebookresearch/dacvae/archive/414c20785fc3a28373073ea8ef7a1316eeeaca6e.zip')
     Write-Host '[MODEL] Downloading Irodori checkpoint from Hugging Face into models\ ...' -ForegroundColor Cyan
     & $python (Join-Path $PSScriptRoot 'prepare.py') --backend $Backend
     if ($LASTEXITCODE -ne 0) { throw 'Model preparation / runtime check failed. See logs/first-setup.log.' }

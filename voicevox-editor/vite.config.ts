@@ -73,7 +73,8 @@ export default defineConfig((options) => {
     (mode !== "production"
       ? path.join(import.meta.dirname, "vendored", "7z") + path.sep
       : "") + sevenZipBinName;
-  process.env.VITE_APP_VERSION = process.env.npm_package_version;
+  process.env.VITE_APP_VERSION =
+    process.env.npm_package_version ?? env.VITE_APP_VERSION;
 
   const shouldEmitSourcemap = ["development", "test"].includes(mode);
   const sourcemap: BuildOptions["sourcemap"] = shouldEmitSourcemap

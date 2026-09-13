@@ -99,7 +99,10 @@ def main():
     parser.add_argument("--precision", choices=("fp32", "fp16"), default="fp32")
     args = parser.parse_args()
     from huggingface_hub import hf_hub_download
+    # Pinned revision so an existing ONNX codec can be reproduced later.
     weights = hf_hub_download("Aratako/Semantic-DACVAE-Japanese-32dim", "weights.pth",
+                              revision=os.environ.get("IRODORI_CODEC_REVISION",
+                                                      "47376ee24834d7a05a48ebabfe3cde29b3c5e214"),
                               cache_dir=str(BOX / ".cache" / "huggingface"))
     model = DACVAE.load(weights).eval().to(
         dtype=torch.float16 if args.precision == "fp16" else torch.float32)

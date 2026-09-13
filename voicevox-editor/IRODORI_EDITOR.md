@@ -8,7 +8,7 @@
 
 ## フォルダ配置
 
-現在のビルドはこのPCの準備済みエンジンを使います。exe横の `irodori-engine-path.txt` にエンジンフォルダへの相対パスまたは絶対パスを指定できます。設定ファイルがなければexe横の `irodori-engine` フォルダを使います。
+現在のビルドは、用意済みのエンジンフォルダに接続して使います。exe横の `irodori-engine-path.txt` にエンジンフォルダへの相対パスまたは絶対パスを指定できます。設定ファイルがなければexe横の `irodori-engine` フォルダを使います。
 
 エンジンフォルダの `models` に対応するIrodoriチェックポイント(.safetensors)、`embeddings` に *.speaker.safetensors を置いて、画面の「一覧を更新」を押します。話者なしでも生成できます。話者のサムネイルは同じ名前の `.png` / `.jpg` / `.webp` を隣に置くとVOICEVOXの話者一覧へ表示されます。
 

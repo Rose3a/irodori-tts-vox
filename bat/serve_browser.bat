@@ -15,8 +15,6 @@ if not exist "%~dp0..\logs" mkdir "%~dp0..\logs"
 set "NODE=%~dp0..\.local\node\24.11.1\node.exe"
 if exist "%NODE%" goto node_ready
 set "NODE=node.exe"
-if exist "%USERPROFILE%\.cache\codex-runtimes\codex-primary-runtime\dependencies\node\bin\node.exe" set "NODE=%USERPROFILE%\.cache\codex-runtimes\codex-primary-runtime\dependencies\node\bin\node.exe"
-if not "%NODE%"=="node.exe" if exist "%NODE%" goto node_ready
 where node.exe >nul 2>&1
 if errorlevel 1 (
   echo Node.js was not found. Install Node.js 24.11+ and retry.
@@ -25,5 +23,8 @@ if errorlevel 1 (
 :node_ready
 set "VITE_TARGET=browser"
 set "npm_package_name=voicevox-irodori"
+rem vite.config.ts reads the app version from npm_package_version, which only
+rem exists when pnpm/npm starts vite. Set it here for the direct node launch.
+set "npm_package_version=0.1.0"
 "%NODE%" "%~dp0..\voicevox-editor\node_modules\vite\bin\vite.js" --host 127.0.0.1 --port 5173 --strictPort > "%~dp0..\logs\browser-ui.log" 2>&1
 exit /b %errorlevel%

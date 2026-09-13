@@ -10,6 +10,14 @@ BOX = Path(__file__).resolve().parents[1]
 os.environ['HF_HOME'] = str(BOX / '.cache' / 'huggingface')
 sys.path.insert(0, str(BOX / 'runtime' / 'trt-lab' / 'repo'))
 
+# Pinned so the same setup produces the same checkpoint later. Bump both the
+# revision and the note when switching the default model; set the environment
+# variables to test another revision without editing this file.
+MODEL_REPO = 'Aratako/Irodori-TTS-v4.1-Small'
+MODEL_REVISION = os.environ.get('IRODORI_MODEL_REVISION', '2b28324dc263ed5e6638b3cf3dd94c82ead07b4b')
+CODEC_REPO = 'Aratako/Semantic-DACVAE-Japanese-32dim'
+CODEC_REVISION = os.environ.get('IRODORI_CODEC_REVISION', '47376ee24834d7a05a48ebabfe3cde29b3c5e214')
+
 def verify_audio_io():
     """Exercise the runtime's WAV export, including its SoundFile fallback."""
     import torch
@@ -44,11 +52,12 @@ def main():
     from dacvae import DACVAE
     checkpoint = BOX / 'models' / 'model.safetensors'
     if not checkpoint.is_file():
-        hf_hub_download('Aratako/Irodori-TTS-v4.1-Small', 'model.safetensors', local_dir=str(checkpoint.parent))
+        hf_hub_download(MODEL_REPO, 'model.safetensors', revision=MODEL_REVISION,
+                        local_dir=str(checkpoint.parent))
     with safe_open(str(checkpoint), framework='pt') as f:
         metadata = f.metadata() or {}
         print('Checkpoint metadata:', list(metadata), flush=True)
-    hf_hub_download('Aratako/Semantic-DACVAE-Japanese-32dim', 'weights.pth')
+    hf_hub_download(CODEC_REPO, 'weights.pth', revision=CODEC_REVISION)
     config = json.loads(metadata['config_json'])
     for repo in {config['text_tokenizer_repo'], config.get('caption_tokenizer_repo') or config['text_tokenizer_repo']}:
         PretrainedTextTokenizer.from_pretrained(repo, revision=config.get('text_encoder_revision'))

@@ -110,7 +110,8 @@ def blink_thumbnail_for(path: Path) -> tuple[str, str] | None:
     for image in candidates:
         if image.is_file() and image.stat().st_size <= 2_000_000:
             raw = image.read_bytes()
-            return "image/png", base64.b64encode(raw).decode("ascii")
+            mime = mimetypes.guess_type(image.name)[0] or "image/png"
+            return mime, base64.b64encode(raw).decode("ascii")
     return None
 
 

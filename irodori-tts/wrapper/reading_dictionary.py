@@ -140,13 +140,18 @@ class ReadingDictionary:
             def convert(match):
                 token = match[0]
                 # Initialisms and one-letter words are pronounced letter by letter.
-                if len(token) == 1 or (token.isupper() and len(token) > 1):
+                # Apostrophes and other symbols are not in LETTER_KANA, so only
+                # pure alphabetic tokens may take this path.
+                if token.isalpha() and (len(token) == 1 or token.isupper()):
                     return ''.join(LETTER_KANA[c.upper()] for c in token)
                 return alkana.get_kana(token.lower()) or token
             return re.sub(r"[A-Za-z]+(?:['’][A-Za-z]+)?", convert, value)
         if not readings:
             return english(text)
-        pattern = re.compile('|'.join(re.escape(k) for k in readings), re.IGNORECASE | re.ASCII)
+        # Longest key first: Python's alternation keeps the first match, so a
+        # shorter builtin would otherwise swallow a longer user entry.
+        ordered = sorted(readings, key=len, reverse=True)
+        pattern = re.compile('|'.join(re.escape(k) for k in ordered), re.IGNORECASE | re.ASCII)
         result, start = [], 0
         for match in pattern.finditer(text):
             result.extend((english(text[start:match.start()]), readings[match[0].lower()]))

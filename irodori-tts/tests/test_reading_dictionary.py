@@ -29,6 +29,22 @@ class DictionaryTests(unittest.TestCase):
                          "いろどり ギットハブ グラディオ")
         self.assertEqual(self.dictionary.convert("zzzxxyy"), "zzzxxyy")
 
+    def test_apostrophe_and_all_caps_tokens_do_not_raise(self):
+        # Letter-by-letter conversion only knows A-Z; apostrophes must fall back.
+        for text in ["ROCK'N ROLL", "O'BRIEN さん", "ROCK’N", "DON'T STOP"]:
+            self.assertIsInstance(self.dictionary.convert(text), str)
+
+    def test_user_entry_beats_longer_or_shorter_builtin(self):
+        d = self.dictionary
+        d.put(make_word("python3", "パイソンスリー"))
+        d.put(make_word("githubactions", "ギットハブアクションズ"))
+        # The user entry is longer than the builtin, so it has to win.
+        self.assertEqual(d.convert("python3"), "パイソンスリー")
+        self.assertEqual(d.convert("githubactions"), "ギットハブアクションズ")
+        # Builtins still apply where no user entry matches.
+        self.assertEqual(d.convert("python"), "パイソン")
+        self.assertEqual(d.convert("github"), "ギットハブ")
+
     def test_override_longest_priority_and_no_cascade(self):
         d = self.dictionary
         d.put(make_word("hello", "トクシュ"))

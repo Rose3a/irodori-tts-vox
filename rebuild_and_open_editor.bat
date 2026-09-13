@@ -68,18 +68,8 @@ for /f "delims=" %%P in ('where.exe pnpm 2^>nul') do if not defined PNPM_CMD (
 )
 if defined PNPM_CMD goto :run_build
 
-rem Keep the legacy Codex runtime as the last resort, but only if it exists.
-if defined USERPROFILE if exist "%USERPROFILE%\.cache\codex-runtimes\codex-primary-runtime\dependencies\bin\fallback\pnpm.cmd" (
-  set "PNPM_MODE=direct"
-  set "PNPM_CMD=%USERPROFILE%\.cache\codex-runtimes\codex-primary-runtime\dependencies\bin\fallback\pnpm.cmd"
-  set "FALLBACK_BIN=%USERPROFILE%\.cache\codex-runtimes\codex-primary-runtime\dependencies\bin\fallback"
-  set "FALLBACK_NODE_BIN=%USERPROFILE%\.cache\codex-runtimes\codex-primary-runtime\dependencies\node\bin"
-  set "RUNNER_PATH_MODE=fallback"
-  goto :run_build
-)
-
 echo No usable pnpm runner was found.
-echo Checked the project portable Node setup, pnpm on PATH, and the legacy fallback.
+echo Checked the project portable Node setup (run bat\first_setup.bat) and pnpm on PATH.
 exit /b 3
 
 :run_build

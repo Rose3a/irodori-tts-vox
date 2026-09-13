@@ -47,6 +47,19 @@ Python 環境を構成済みの場合、音声 I/O の確認は次で行えま�
 
 配布環境の簡易検証には `bat\verify.bat` を使います。生成物とログは `outputs/` と `logs/` に保存され、Git には追加されません。
 
+ユニットテストは標準の `unittest` で書いてあるので pytest は不要です。
+
+```powershell
+.\.local\venv\Scripts\python.exe -m unittest discover -s irodori-tts\tests -t irodori-tts\tests -p "test_*.py"
+```
+
+WebUI と同じ経路（セッショントークン、`/audio_query`、`/synthesis`）や、ヘッドレスブラウザでの描画確認の手順は [docs/TESTING.md](docs/TESTING.md) にまとめています。
+
+### セットアップスクリプトの使い分け
+
+- `bat\first_setup.bat`（推奨）: `tools\setup.ps1` を呼び、GPU を判定して `.local` に Python・Node・依存関係・モデルを用意します。`bat\launch.bat` や `bat\serve_browser.bat` はこの環境を使います。
+- `irodori-tts\setup_venv.bat`: ラッパー単体を `irodori-tts\.venv` で動かすための旧来の経路です。依存の指定が上と異なるので、通常は使わなくて構いません。
+
 ## ライセンスと第三者コンポーネント
 
-ライセンス境界、上流プロジェクト、モデル・話者データの扱いは [NOTICE.md](NOTICE.md) を必ず確認してください。特に `voicevox-editor/` の改変・再配布には LGPL-3.0 の条件が適用されます。
+ライセンス境界、上流プロジェクト、モデル・話者データの扱いは [NOTICE.md](NOTICE.md) を必ず確認してください。特に `voicevox-editor/` の改変・再配布には LGPL-3.0 の条件が適用されます。リポジトリ全体の方針と LGPL-3.0 の全文は [LICENSE](LICENSE) にあります。
