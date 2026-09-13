@@ -1,0 +1,9 @@
+{
+  "appId": "local.irodori.voicevox-editor",
+  "productName": "Irodori VOICEVOX Editor",
+  "directories": { "output": "release", "buildResources": "build" },
+  "files": ["dist/**/*", "package.json"],
+  "extraFiles": ["irodori-engine.exe", "IRODORI_EDITOR.md", {"from":"build/irodori-engine-path.txt", "to":"irodori-engine-path.txt"}, {"from":"vendored/7z/7za.exe", "to":"7za.exe"}],
+  "win": { "target": [{ "target":"dir", "arch":["x64"] }], "signAndEditExecutable": false },
+  "electronLanguages": ["en-US", "ja"]
+}

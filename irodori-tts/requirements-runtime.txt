@@ -1,0 +1,15 @@
+# Runtime/export dependencies for the bundled Irodori source.
+alkana==0.0.3
+huggingface-hub>=0.34
+transformers>=5.12,<6
+torchaudio>=2.10
+torchcodec>=0.10,<0.11
+sentencepiece>=0.1.99,<0.2
+soundfile>=0.12
+pyyaml>=6.0
+descript-audiotools==0.7.2
+# Keep this compatible with descript-audiotools during the bulk install.
+# setup_venv.bat upgrades protobuf after the audio stack so ONNX 1.22 can
+# import for export; the runtime does not use the old protobuf API directly.
+protobuf<3.20
+einops>=0.7

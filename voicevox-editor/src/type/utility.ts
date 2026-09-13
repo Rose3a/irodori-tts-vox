@@ -1,0 +1,56 @@
+/** ブランド型を作る */
+export type Brand<K, T> = K & { __brand: T };
+
+/*
+ * XとYが同じ型かどうかを判定する。
+ * const _: IsEqual<X, Y> = true; のように使う。
+ **/
+export type IsEqual<X, Y> =
+  (<T>() => T extends X ? 1 : 2) extends <T>() => T extends Y ? 1 : 2
+    ? true
+    : false;
+
+// undefinedかnullでないことを保証する
+export function assertNonNullable<T>(
+  value: T,
+  message = "Value is null or undefined",
+): asserts value is NonNullable<T> {
+  if (value == undefined) {
+    throw new Error(message);
+  }
+}
+
+/** 入力がnullかundefinedの場合エラーを投げ、それ以外の場合は入力をそのまま返す */
+export const ensureNotNullish = <T>(
+  value: T | null | undefined,
+  message = "Unexpected nullish value",
+): T => {
+  if (value == null) {
+    throw new Error(message);
+  }
+  return value;
+};
+
+/**
+ * never型になるはずの値を使って型システムで非到達をチェックできる便利クラス。
+ * valueに指定した値がnever型じゃなかった場合に型システムがエラーを出してくれる。
+ */
+export class ExhaustiveError extends Error {
+  constructor(value: never) {
+    super(`Not exhaustive. value: ${String(value)}`);
+  }
+}
+
+/**
+ * 実行時に到達しないであろうコードに到達したことを示すエラー。
+ *
+ * nullable検査や入力バリデーション用途には
+ * `assertNonNullable` や `ensureNotNullish` を使用する。
+ */
+// TODO: 到達不能分岐には UnreachableError を使用するよう統一する
+export class UnreachableError extends Error {
+  constructor(message?: string) {
+    super(message || "Unreachable code was executed.");
+    this.name = "UnreachableError";
+  }
+}

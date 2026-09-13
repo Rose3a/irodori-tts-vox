@@ -1,0 +1,23 @@
+# Irodori VOICEVOX Editor
+
+既存のVOICEVOXフォーク本体です。独自Tkinter GUIとは別です。
+
+`release/win-unpacked/Irodori VOICEVOX Editor.exe` を起動します。右側のIrodori-TTSパネルでエンジン・モデルを選んで「設定を適用」します。音声長・ステップ数・Schedule・Seed・CFG・キャプション・音声リファレンスはセリフごとに設定でき、vvprojに保存されます。エンジンなどの共通設定はエンジンフォルダのeditor-settings.jsonに保存します。
+
+選択変更は設定適用時に確定します。CPU/CUDA/TensorRT/Radeonは単一のAPI接続先を共有し、話者と台本を維持します。モデルは初回生成時に読み込み、同じ構成なら再利用します。別の構成を適用すると前のモデルを解放します。非対応GPUや不足ファイルは生成時にエラー表示します。
+
+## フォルダ配置
+
+現在のビルドはこのPCの準備済みエンジンを使います。exe横の `irodori-engine-path.txt` にエンジンフォルダへの相対パスまたは絶対パスを指定できます。設定ファイルがなければexe横の `irodori-engine` フォルダを使います。
+
+エンジンフォルダの `models` に対応するIrodoriチェックポイント(.safetensors)、`embeddings` に *.speaker.safetensors を置いて、画面の「一覧を更新」を押します。話者なしでも生成できます。話者のサムネイルは同じ名前の `.png` / `.jpg` / `.webp` を隣に置くとVOICEVOXの話者一覧へ表示されます。
+
+Torchで追加した話者埋め込みはTensorRTでもそのまま共用します。話者追加のための変換やplan再構築は不要です。WebエディターのTensorRTは選択モデルを初回にONNX化して専用planを構築し、モデル内容・GPU・ランタイムに対応するキャッシュを再利用します。MeanFlowにも対応し、進捗表示が完了するとモデルが読み込まれます。Radeonは既存のDirectML PythonとONNX codecの追加準備が必要です。
+
+配布フォルダを分ける場合は、フロントエンドの `irodori-engine-path.txt` にバックエンドフォルダを指定します。推奨レイアウトはエンジン側の `DEPLOYMENT_LAYOUT.md` を参照してください。
+
+別PCではエンジンフォルダでsetup_venv.batを実行し、そのPC向けの依存関係とモデルを準備します。Pythonのvenvはコピー移植を保証しません。このビルドは全依存を内包するインストーラーではなく、準備済み環境に接続するElectronアプリです。Electronのwin-unpackedフォルダはexe以外のファイルも一緒に保持してください。
+
+## 開発
+
+`pnpm run electron:build:compile` の後に `node node_modules/electron-builder/cli.js --config build/irodori-builder.json --win dir --publish never` で梱包します。ブートストラップのC#ソースはbuild/IrodoriEngineBootstrap.csです。

@@ -1,0 +1,97 @@
+# Per-PC environments and downloaded caches
+.local/
+.cache/
+irodori-tts/.venv/
+irodori-tts/.cache/
+voicevox-editor/node_modules/
+node_modules/
+.pnpm-store/
+voicevox-editor/dist/
+voicevox-editor/dist_electron/
+voicevox-editor/release/
+
+# Downloaded model and generated GPU plans
+models/*.safetensors
+models/**/*.safetensors
+models/asr/
+hf-cache/
+irodori-tts/models/
+irodori-tts/bf16-fallback/*.plan
+runtime/**/*.plan
+
+# Model-derived and voice data are never part of the source distribution.
+# Keep only the placeholder files that describe these directories.
+speakers/*
+!speakers/.gitkeep
+!speakers/thumbnails/
+speakers/thumbnails/*
+!speakers/thumbnails/.gitkeep
+!speakers/thumbnails/default-speaker.png
+speakers_import_log.json
+
+# Locally built or downloaded executables. Build them locally or obtain them
+# from their respective upstream release channels.
+*.exe
+tools/uv.exe
+
+# Local output, logs and temporary work
+logs/
+outputs/
+work/
+backups/
+speakers/**/_backup_*/
+*.log
+*.tmp
+first_setup_gpu_first.txt
+launch_gpu_first.txt
+setup.lock
+
+# Private investigation notes and machine-specific benchmark artifacts.
+AUDIT.md
+docs/BOX_STATUS.md
+docs/GIT_SETUP.md
+docs/irodori-code-architecture.html
+irodori-tts/FALLBACK_RUN_TASK.md
+irodori-tts/PARENT_FINDINGS.md
+irodori-tts/PROGRESS.md
+irodori-tts/REPORT.md
+irodori-tts/TASK.md
+irodori-tts/baseline_*.json
+irodori-tts/diagnosis.json
+irodori-tts/fallback_*summary.json
+irodori-tts/full_profile_*.json
+irodori-tts/manifest_*.json
+irodori-tts/native_export.json
+irodori-tts/native_parse_failure.txt
+irodori-tts/parent_*summary.json
+irodori-tts/parent_*analysis.json
+irodori-tts/prior_*.json
+irodori-tts/desktop-settings.json
+irodori-tts/baseline_measure.py
+irodori-tts/build_attention_native.py
+irodori-tts/diagnose.py
+irodori-tts/export_attention_native.py
+irodori-tts/full_profile.py
+irodori-tts/manifest.py
+
+# Editor local state
+.env
+.env.*
+!.env.example
+user_dictionary.json
+voicevox-editor/.env
+voicevox-editor/irodori-engine-path.txt
+irodori-tts/editor-settings.json
+
+# Credentials and signing material must never be committed.
+*.pem
+*.key
+*.pfx
+*.p12
+
+# OS/editor noise
+Thumbs.db
+.DS_Store
+.vscode/
+__pycache__/
+*.pyc
