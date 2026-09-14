@@ -19,7 +19,8 @@ if not defined IRODORI_CHECKPOINT if exist "%ROOT%\models\model.safetensors" set
 if not defined IRODORI_HF_HOME set "IRODORI_HF_HOME=%ROOT%\.cache\huggingface"
 if not defined IRODORI_CACHE_DIR set "IRODORI_CACHE_DIR=%ROOT%\.cache\irodori"
 
-if not exist "%PYEXE%" set "PYEXE=E:\tts\trt-lab-20260905\.venv\Scripts\python.exe"
+rem Only this folder's .venv is used. Set IRODORI_PYTHON if the interpreter
+rem lives outside the project; no absolute paths are baked into this file.
 
 if not exist "%ROOT%\.venv\Scripts\python.exe" if exist "%ROOT%\setup_venv.bat" (
     call "%ROOT%\setup_venv.bat" --no-pause

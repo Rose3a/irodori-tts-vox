@@ -34,11 +34,13 @@ if not defined IRODORI_CHECKPOINT if exist "%ROOT%\models\v41small.bf16.safetens
 if not defined IRODORI_HF_HOME set "IRODORI_HF_HOME=%ROOT%\.cache\huggingface"
 if not defined IRODORI_CACHE_DIR set "IRODORI_CACHE_DIR=%ROOT%\.cache\irodori"
 if not defined IRODORI_PYTHON if exist "%ROOT%\.venv\Scripts\python.exe" set "IRODORI_PYTHON=%ROOT%\.venv\Scripts\python.exe"
-if not defined IRODORI_PYTHON set "IRODORI_PYTHON=E:\tts\trt-lab-20260905\.venv\Scripts\python.exe"
-if not defined IRODORI_RUNTIME_DIR set "IRODORI_RUNTIME_DIR=E:\tts"
-if not defined IRODORI_EMBED_DIR set "IRODORI_EMBED_DIR=E:\tts\embeddings"
-if not defined IRODORI_PLAN set "IRODORI_PLAN=E:\tts\trt-slope-20260906\bf16-fallback\fallback_bf16.plan"
-if not defined IRODORI_CHECKPOINT set "IRODORI_CHECKPOINT=E:\tts\quantized\v41small.bf16.safetensors"
+rem Defaults are resolved relative to this folder. No developer-machine
+rem absolute paths here; set the IRODORI_ variables for assets kept elsewhere.
+if not defined IRODORI_PYTHON set "IRODORI_PYTHON=%ROOT%\.venv\Scripts\python.exe"
+if not defined IRODORI_RUNTIME_DIR set "IRODORI_RUNTIME_DIR=%ROOT%\runtime"
+if not defined IRODORI_EMBED_DIR set "IRODORI_EMBED_DIR=%ROOT%\embeddings"
+if not defined IRODORI_PLAN set "IRODORI_PLAN=%ROOT%\bf16-fallback\fallback_bf16.plan"
+if not defined IRODORI_CHECKPOINT set "IRODORI_CHECKPOINT=%ROOT%\models\v41small.bf16.safetensors"
 if not defined IRODORI_OUT_DIR set "IRODORI_OUT_DIR=%ROOT%\outputs"
 
 set "PYEXE=%IRODORI_PYTHON%"

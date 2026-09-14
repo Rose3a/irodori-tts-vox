@@ -19,16 +19,19 @@ from typing import Iterable, Optional
 import torch
 
 # ---------------------------------------------------------------- defaults
+# 既定値はこのリポジトリからの相対で決める。開発機の絶対パスは置かない。
+# 別の場所に置いた資産を使うときは IRODORI_* 環境変数で明示する。
+BOX_ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_EMBED_DIRS: tuple[Path, ...] = (
-    Path(__file__).resolve().parents[2] / "speakers",
+    BOX_ROOT / "speakers",
     Path(__file__).resolve().parents[1] / "embeddings",
 )
-DEFAULT_PLAN_PATH = Path("E:/tts/trt-slope-20260906/bf16-fallback/fallback_bf16.plan")
-DEFAULT_CHECKPOINT = Path("E:/tts/quantized/v41small.bf16.safetensors")
-DEFAULT_HF_HOME = Path("E:/cache/huggingface")
-DEFAULT_RUNTIME_DIR = Path("E:/tts")
-DEFAULT_PYTHON = Path("E:/tts/trt-lab-20260905/.venv/Scripts/python.exe")
-DEFAULT_CACHE_DIR = Path("E:/tts/irodori-tts-cache")
+DEFAULT_PLAN_PATH = BOX_ROOT / "irodori-tts" / "bf16-fallback" / "fallback_bf16.plan"
+DEFAULT_CHECKPOINT = BOX_ROOT / "models" / "model.safetensors"
+DEFAULT_HF_HOME = BOX_ROOT / ".cache" / "huggingface"
+DEFAULT_RUNTIME_DIR = BOX_ROOT / "runtime"
+DEFAULT_PYTHON = BOX_ROOT / ".local" / "venv" / "Scripts" / "python.exe"
+DEFAULT_CACHE_DIR = BOX_ROOT / ".cache" / "irodori-tts-cache"
 MAX_HTTP_BODY = 16 * 1024 * 1024
 
 
@@ -62,9 +65,10 @@ def env_path_list(name: str) -> list[Path]:
 
 def _import_runtime():
     """Wire sys.path so both the irodori_tts package and the lab helpers
-    are importable. The irodori_tts package is in
-    <E:/tts>/Irodori-TTS-Aratako/irodori_tts/, the lab helpers are in
-    <E:/tts>/trt-lab-20260905/. Both directories are added explicitly.
+    are importable. Both live under IRODORI_RUNTIME_DIR (default:
+    <repo>/runtime): the package in Irodori-TTS-Aratako/irodori_tts/,
+    the lab helpers in trt-lab-20260905/. Both directories are added
+    explicitly.
     """
     runtime_dir = env_path("IRODORI_RUNTIME_DIR", DEFAULT_RUNTIME_DIR)
     candidates = (
@@ -104,7 +108,8 @@ def resolve_embed_dirs(extra: Iterable[Path] = ()) -> list[Path]:
 
     1. Any paths passed via the CLI (relative paths resolve against cwd).
     2. IRODORI_EMBED_DIRS / IRODORI_EMBED_DIR environment variables.
-    3. The built-in defaults (E:/tts/embeddings, D:/tts/embeddings).
+    3. The built-in defaults, relative to this repository:
+       <repo>/speakers and <repo>/irodori-tts/embeddings.
     """
     seen: list[Path] = []
     seen_resolved: set[str] = set()

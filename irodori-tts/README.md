@@ -1,6 +1,6 @@
 # Irodori-TTS backend
 
-開発中の実体は `D:\hermes\irodori-trt-slope-20260906`。boxへ配置するときは、wrapper、`.venv`、`bf16-fallback`、`runtime` をこのフォルダへまとめます。
+このフォルダが box のバックエンド側です。wrapper、`.venv`、`bf16-fallback`、`runtime` をここにまとめ、フロントエンドからは相対パスで参照します（配布レイアウトは `DEPLOYMENT_LAYOUT.md` を参照）。
 
 ## 推奨運用
 

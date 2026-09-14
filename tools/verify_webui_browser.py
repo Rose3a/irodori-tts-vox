@@ -12,6 +12,7 @@ from __future__ import annotations
 import asyncio
 import base64
 import json
+import os
 import subprocess
 import sys
 import tempfile
@@ -21,7 +22,9 @@ from pathlib import Path
 
 import websockets
 
-CHROME = r"C:\Program Files\Google\Chrome\Application\chrome.exe"
+# Chrome の場所は IRODORI_CHROME で差し替えられる（既定は Windows の標準インストール先）。
+CHROME = os.environ.get(
+    "IRODORI_CHROME", r"C:\Program Files\Google\Chrome\Application\chrome.exe")
 APP = "http://127.0.0.1:5173/"
 ENGINE = "http://127.0.0.1:50125"
 PORT = 9333

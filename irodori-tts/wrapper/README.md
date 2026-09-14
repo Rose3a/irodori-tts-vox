@@ -62,13 +62,13 @@ interpreter.
 List the speakers (uses defaults unless `--embed-dir` is added):
 
 ```bat
-E:\tts\trt-lab-20260905\.venv\Scripts\python.exe E:\tts\trt-slope-20260906\wrapper\tts_cli.py --list-speakers
+.venv\Scripts\python.exe wrapper\tts_cli.py --list-speakers
 ```
 
 Synthesise one utterance with an extra search root:
 
 ```bat
-E:\tts\trt-lab-20260905\.venv\Scripts\python.exe E:\tts\trt-slope-20260906\wrapper\tts_cli.py ^
+.venv\Scripts\python.exe wrapper\tts_cli.py ^
     --embed-dir .\embeddings ^
     --speaker local_fairy ^
     --text "hello cassette" ^
@@ -82,7 +82,7 @@ it is best to keep the text short and avoid embedded spaces when
 calling the bat from another program. From a fresh cmd prompt:
 
 ```bat
-cd E:\tts\trt-slope-20260906\wrapper
+cd wrapper
 run.bat --list-speakers
 run.bat --speaker local_fairy --text "hello" --out outputs\out.wav --embed-dir .\embeddings
 ```
@@ -93,7 +93,7 @@ arguments carefully:
 
 ```python
 import subprocess
-subprocess.run(["cmd", "/c", "call", r"E:\tts\trt-slope-20260906\wrapper\run.bat",
+subprocess.run(["cmd", "/c", "call", r"wrapper\run.bat",
                 "--list-speakers", "--embed-dir", r".\embeddings"],
                capture_output=True, text=True, shell=False)
 ```
@@ -108,7 +108,7 @@ duplicates collapsed by canonical path:
 2. Paths in the `IRODORI_EMBED_DIRS` environment variable (`;` or `,`
    separated).
 3. Paths in the `IRODORI_EMBED_DIR` environment variable (single path).
-4. The built-in defaults: `E:\tts\embeddings` and `D:\tts\embeddings`.
+4. The built-in defaults, relative to this project: `<repo>\speakers` and `<repo>\irodori-tts\embeddings`.
 
 `--list-search-dirs` prints the resolved roots. The runtime cassette
 re-scans on every call to `--list-speakers` / `--refresh-cassette`,
@@ -141,14 +141,14 @@ Endpoints:
 
 ## Speaker cassette
 
-- Default search roots are `E:\tts\embeddings\` and `D:\tts\embeddings\`.
+- Default search roots are `<repo>\speakers\` and `<repo>\irodori-tts\embeddings\`.
 - Add any number of additional roots with `--embed-dir DIR` on the CLI
   or via `IRODORI_EMBED_DIRS=root1;root2`. Relative paths resolve
   against the current working directory.
 - Each embedding is loaded from disk on first use and cached on the
   GPU (bf16, 1..64 × 768). Switching speakers reuses the resident
   TensorRT plan and rewrites a single small `.speaker.safetensors`
-  cache file in `E:\tts\irodori-tts-cache\`.
+  cache file in `<repo>\.cache\irodori-tts-cache\`.
 - Both `fairy` and `fairy.speaker` are accepted as speaker names.
 - Missing speaker raises a clear `FileNotFoundError` with the list of
   available names and the directories that were searched.
@@ -162,7 +162,7 @@ Resolution order:
 1. `IRODORI_BACKEND=trt|torch` environment variable
 2. `--backend trt|torch|auto` CLI flag (default `auto`)
 3. `auto` picks `trt` if CUDA is available and
-   `E:\tts\trt-slope-20260906\bf16-fallback\fallback_bf16.plan` exists,
+   `<repo>\irodori-tts\bf16-fallback\fallback_bf16.plan` exists,
    otherwise `torch`.
 
 `torch` runs the same Irodori model on CPU (or CUDA without a plan).
@@ -176,17 +176,17 @@ TensorRT-specific.
 | `IRODORI_BACKEND` | `auto` | `trt`, `torch`, or `auto` |
 | `IRODORI_EMBED_DIR` | unset | single additional search root |
 | `IRODORI_EMBED_DIRS` | unset | `;` or `,` separated additional search roots |
-| `IRODORI_PLAN` | `E:\tts\trt-slope-20260906\bf16-fallback\fallback_bf16.plan` | trt backend only |
-| `IRODORI_RUNTIME_DIR` | `E:\tts` | parent of `Irodori-TTS-Aratako` and `trt-lab-20260905` |
-| `IRODORI_PYTHON` | `E:\tts\trt-lab-20260905\.venv\Scripts\python.exe` | venv interpreter |
-| `IRODORI_CHECKPOINT` | `E:\tts\quantized\v41small.bf16.safetensors` | torch backend, also used by the trt runtime |
-| `IRODORI_HF_HOME` | `E:\cache\huggingface` | HuggingFace cache for codec + text encoder |
-| `IRODORI_CACHE_DIR` | `E:\tts\irodori-tts-cache` | where the active speaker is staged for the Irodori runtime |
+| `IRODORI_PLAN` | `<repo>\irodori-tts\bf16-fallback\fallback_bf16.plan` | trt backend only |
+| `IRODORI_RUNTIME_DIR` | `<repo>\runtime` | parent of `Irodori-TTS-Aratako` and `trt-lab-20260905` |
+| `IRODORI_PYTHON` | `<repo>\.local\venv\Scripts\python.exe` | venv interpreter |
+| `IRODORI_CHECKPOINT` | `<repo>\models\model.safetensors` | torch backend, also used by the trt runtime |
+| `IRODORI_HF_HOME` | `<repo>\.cache\huggingface` | HuggingFace cache for codec + text encoder |
+| `IRODORI_CACHE_DIR` | `<repo>\.cache\irodori-tts-cache` | where the active speaker is staged for the Irodori runtime |
 | `IRODORI_RADEON_PRECISION` | `fp32` | Radeon only: `fp32` or opt-in `fp16`; invalid values fail clearly |
 | `IRODORI_RADEON_CODEC_FP16` | `work\codec_decoder_fp16.onnx` | validated FP16 codec required when Radeon precision is `fp16` |
 
 All paths can be overridden; nothing in the wrapper edits protected
-files in `E:\tts\Irodori-TTS-Aratako` or any pre-existing plan.
+files in `<repo>\runtime\Irodori-TTS-Aratako` or any pre-existing plan.
 
 FP16 Radeon launch (after exporting a compatible codec):
 `$env:IRODORI_BACKEND='radeon'; $env:IRODORI_RADEON_PRECISION='fp16'; python wrapper\tts_cli.py --backend radeon --text 'テスト'`
@@ -196,7 +196,7 @@ If FP16 export or validation fails, keep using the default FP32 codec/path; FP16
 ## Verified
 
 - `tts_cli.py --list-speakers` lists 38 speakers from
-  `E:\tts\embeddings\` plus any others found in `--embed-dir`
+  `<repo>\speakers\` plus any others found in `--embed-dir`
   candidates.
 - `tts_cli.py --speaker fairy --text "..."` produces a finite WAV.
 - `serve.bat` accepts GET/POST. A 5-call `fairy → ug → fairy → ug → norma_ug`
@@ -205,6 +205,6 @@ If FP16 export or validation fails, keep using the default FP32 codec/path; FP16
 - `--embed-dir .\embeddings` (relative to cwd) is resolved to an
   absolute path and prepended to the search list, so a project's
   own `.speaker.safetensors` are picked up alongside the shared
-  `E:\tts\embeddings` defaults.
+  `<repo>\speakers` defaults.
 - `--list-search-dirs` prints the resolved roots in the order the
   cassette scans them.
