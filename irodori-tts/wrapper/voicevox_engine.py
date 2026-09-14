@@ -524,7 +524,8 @@ class Handler(BaseHTTPRequestHandler):
                 self._json(404, {"detail": "speaker not found"})
                 return
             self._json(200, {
-                "policy": "Irodori-TTS speaker cassette",
+                "policy": speaker.get("credit") or "Irodori-TTS speaker cassette",
+                "credit": speaker.get("credit"),
                 "portrait": next((item.get("portrait", TINY_PNG) for item in self.adapter.speakers_json
                                    if item.get("speaker_uuid") == speaker_uuid), TINY_PNG),
                 "style_infos": [
