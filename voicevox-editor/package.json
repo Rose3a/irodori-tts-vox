@@ -1,7 +1,7 @@
 {
   "name": "voicevox-irodori",
   "version": "0.1.0",
-  "author": "Hiroshiba Kazuyuki",
+  "author": "Rose3a and VOICEVOX contributors",
   "private": true,
   "main": "./dist/main.js",
   "type": "module",

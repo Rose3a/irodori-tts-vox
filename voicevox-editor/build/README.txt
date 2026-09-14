@@ -1,19 +1,9 @@
-ダミー利用規約
+Irodori-TTS Vox
 
-## 禁止事項
+Irodori-TTS のローカル推論環境を操作するための改変版エディタです。
+VOICEVOX公式の製品・サービスではありません。
 
-- ダミー禁止事項
+利用条件と第三者コンポーネントの情報は、プロジェクトの LICENSE、NOTICE.md、
+voicevox-editor/LICENSE および voicevox-editor/LGPL_LICENSE を確認してください。
 
-## 免責事項
-
-ダミー免責事項
-
-## その他
-
-ダミーその他
-
-## 謝辞
-
-ダミー謝辞
-
-[ダミーリンク](https://voicevox.hiroshiba.jp/)
+プロジェクト: https://github.com/Rose3a/irodori-tts-vox

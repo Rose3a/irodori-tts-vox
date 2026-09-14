@@ -98,7 +98,10 @@ const reloadAppWithMultiEngineOffMode = () => {
 };
 
 const openQa = () => {
-  window.open("https://voicevox.hiroshiba.jp/qa/", "_blank");
+  window.open(
+    "https://github.com/Rose3a/irodori-tts-vox/blob/main/voicevox-editor/public/irodori-qAndA.md",
+    "_blank",
+  );
 };
 </script>
 

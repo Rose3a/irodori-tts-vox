@@ -112,7 +112,7 @@ const builderOptions: ElectronBuilderConfiguration = {
   // electron-builder installer
   productName: "Irodori VOICEVOX Editor",
   appId: "jp.irodori.voicevox",
-  copyright: "Hiroshiba Kazuyuki",
+  copyright: "Rose3a and VOICEVOX contributors",
   afterAllArtifactBuild,
   electronFuses: {
     runAsNode: false,

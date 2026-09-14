@@ -42,6 +42,7 @@ import { useElectronMenuBarData } from "@/backend/electron/renderer/menuBarData"
 import { removeNullableAndBoolean } from "@/helpers/arrayHelper";
 
 const store = useStore();
+const isIrodoriFork = import.meta.env.VITE_APP_NAME === "voicevox-irodori";
 
 // TODO: useMenuBarData系の関数をcomposableじゃなくする
 const commonMenuBarData = useCommonMenuBarData(store);
@@ -67,7 +68,7 @@ const gtm = useGtm();
 watch(
   () => store.state.acceptRetrieveTelemetry,
   (acceptRetrieveTelemetry) => {
-    gtm?.enable(acceptRetrieveTelemetry === "Accepted");
+    gtm?.enable(!isIrodoriFork && acceptRetrieveTelemetry === "Accepted");
   },
   { immediate: true },
 );
@@ -159,8 +160,9 @@ onMounted(async () => {
   // エンジン起動後にダイアログを開く
   void store.actions.SET_DIALOG_OPEN({
     isAcceptRetrieveTelemetryDialogOpen:
-      store.state.acceptRetrieveTelemetry === "Unconfirmed",
+      !isIrodoriFork && store.state.acceptRetrieveTelemetry === "Unconfirmed",
     isAcceptTermsDialogOpen:
+      !isIrodoriFork &&
       import.meta.env.MODE !== "development" &&
       store.state.acceptTerms !== "Accepted",
   });

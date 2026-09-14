@@ -1,6 +1,7 @@
-# ダミーポリシー
+# プライバシーについて
 
-開発版はデフォルト動作でデータ収集を行いません。
+Irodori-TTS Vox は、ソフトウェア利用状況のデータ収集を行いません。
 
-[Google アナリティクス利用規約](https://marketingplatform.google.com/about/analytics/terms/jp/)  
-[Google ポリシーと規約ページ](https://policies.google.com/technologies/ads?hl=ja)
+入力テキスト、生成音声、モデルおよび話者データは、利用者が明示的に操作しない限り外部へ送信されません。ただし、初回のモデル取得など、画面や説明に記載されたダウンロード処理では外部サービスへ接続します。
+
+ログにはWindowsのユーザー名やローカルパスが含まれる場合があります。外部へ共有する前に内容を確認してください。

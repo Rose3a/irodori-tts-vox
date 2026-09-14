@@ -82,8 +82,8 @@ user_dictionary.json
 voicevox-editor/.env
 voicevox-editor/irodori-engine-path.txt
 irodori-tts/editor-settings.json
-# 特定の1環境の絶対パス（Codex のランタイムキャッシュ）を NODE_HOME に埋め込んだ
-# 起動スクリプト。書かれた環境でしか動かず、リポジトリ内からも参照されていない。
+# 特定の開発環境の絶対パスを NODE_HOME に埋め込んだ起動スクリプト。
+# 書かれた環境でしか動かず、リポジトリ内からも参照されていない。
 voicevox-editor/run_irodori_editor.bat
 
 # Credentials and signing material must never be committed.
