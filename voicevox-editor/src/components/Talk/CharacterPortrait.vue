@@ -353,14 +353,14 @@ const isMultipleEngine = computed(() => store.state.engineIds.length > 1);
   }
   .character-credit {
     flex: 0 1 auto;
-    max-height: 25%;
+    max-height: 18%;
     overflow-y: auto;
     width: 100%;
     box-sizing: border-box;
     padding: 4px 8px;
     color: #555;
     background: #fff;
-    font-size: 0.75rem;
+    font-size: 0.65rem;
     line-height: 1.35;
     white-space: pre-line;
     overflow-wrap: anywhere;

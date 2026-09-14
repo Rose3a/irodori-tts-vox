@@ -136,8 +136,8 @@ def portrait_for(path: Path) -> tuple[str, str] | None:
 
 
 def credit_for(path: Path) -> str | None:
-    """Read the short portrait attribution, never the full usage policy."""
-    return _read_credit(path, ("credits.json",))
+    """Read the speaker credit notice, preferring the authoritative text file."""
+    return _read_credit(path, ("credit.txt", "credits.json"))
 
 
 def policy_for(path: Path) -> str | None:

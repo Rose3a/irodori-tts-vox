@@ -15,7 +15,14 @@ Python 3.11、uv、Node.js、pnpm などのツール類は、初回セットア�
 
 ## セットアップと起動
 
-リポジトリルートで以下を実行します。GPU の検出と、`.local` 配下への環境構築が行われます。
+初めて使う場合は、Git を使うなら次のように clone します。Git を使わない場合は、GitHub の「Code」から ZIP をダウンロードして展開してください。
+
+```powershell
+git clone https://github.com/Rose3a/kataribe.git
+cd kataribe
+```
+
+展開または clone したリポジトリのルートで `setup.bat` を一度実行します。GPU の検出と、`.local` 配下への環境構築が行われます。完了後は `open_browser.bat` でブラウザ版を起動します。
 
 ```bat
 setup.bat
