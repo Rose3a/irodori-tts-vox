@@ -42,6 +42,9 @@ async function updateOpenapiJson(engineBase: string) {
   // patch here because the upstream development engine does not know them.
   response.components ??= {};
   response.components.schemas ??= {};
+  const speakerInfo = response.components.schemas.SpeakerInfo ??= { type: "object", properties: {} };
+  speakerInfo.properties ??= {};
+  speakerInfo.properties.credit = { type: "string", description: "Short portrait attribution (Irodori extension)." };
   const audioQuery = response.components.schemas.AudioQuery ??= { type: "object", properties: {} };
   audioQuery.properties ??= {};
   audioQuery.properties.irodori_seed = { type: ["integer", "null"], minimum: 0, maximum: 2147483647 };

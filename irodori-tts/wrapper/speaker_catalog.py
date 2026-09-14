@@ -136,8 +136,17 @@ def portrait_for(path: Path) -> tuple[str, str] | None:
 
 
 def credit_for(path: Path) -> str | None:
-    """Read optional speaker credit metadata from credits.json or credit.txt."""
-    candidates = (path.parent / "credits.json", path.parent / "credit.txt")
+    """Read the short portrait attribution, never the full usage policy."""
+    return _read_credit(path, ("credits.json",))
+
+
+def policy_for(path: Path) -> str | None:
+    """Prefer the full credit notice over abbreviated JSON artwork metadata."""
+    return _read_credit(path, ("credit.txt", "credits.json"))
+
+
+def _read_credit(path: Path, filenames: tuple[str, ...]) -> str | None:
+    candidates = (path.parent / filename for filename in filenames)
     for metadata in candidates:
         if not metadata.is_file() or metadata.stat().st_size > 64_000:
             continue

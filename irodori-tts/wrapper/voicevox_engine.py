@@ -39,7 +39,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from tts_cli import IrodoriTTS, resolve_embed_dirs  # noqa: E402
 from reading_dictionary import READING_DICTIONARY, make_word
-from speaker_catalog import blink_thumbnail_for, credit_for, mouth_open_thumbnail_for, mouth_parts_for, portrait_for, speaker_catalog, _fallback_icon  # noqa: E402
+from speaker_catalog import blink_thumbnail_for, credit_for, policy_for, mouth_open_thumbnail_for, mouth_parts_for, portrait_for, speaker_catalog, _fallback_icon  # noqa: E402
 
 
 ENGINE_VERSION = "0.1.0"
@@ -238,6 +238,7 @@ def _speaker_table(tts: IrodoriTTS, progress_callback=None) -> tuple[list[dict],
         blink = None
         mouth_parts = None
         credit = None
+        policy = None
         if name:
             for directory in tts.embed_dirs:
                 for candidate in Path(directory).rglob("*.safetensors"):
@@ -247,6 +248,7 @@ def _speaker_table(tts: IrodoriTTS, progress_callback=None) -> tuple[list[dict],
                         blink = blink_thumbnail_for(candidate)
                         mouth_parts = mouth_parts_for(candidate)
                         credit = credit_for(candidate)
+                        policy = policy_for(candidate)
                         original = portrait_for(candidate)
                         if original:
                             portrait = original[1]
@@ -265,6 +267,7 @@ def _speaker_table(tts: IrodoriTTS, progress_callback=None) -> tuple[list[dict],
             # 母音ごとの口パーツ（任意）
             "mouth_parts": mouth_parts,
             "credit": credit,
+            "policy": policy,
         })
     if progress_callback:
         progress_callback("speaker table ready", 75)
@@ -527,7 +530,7 @@ class Handler(BaseHTTPRequestHandler):
                 self._json(404, {"detail": "speaker not found"})
                 return
             self._json(200, {
-                "policy": speaker.get("credit") or "Irodori-TTS speaker cassette",
+                "policy": (speaker.get("policy") or "Irodori-TTS speaker cassette").replace("\n", "  \n"),
                 "credit": speaker.get("credit"),
                 "portrait": next((item.get("portrait", TINY_PNG) for item in self.adapter.speakers_json
                                    if item.get("speaker_uuid") == speaker_uuid), TINY_PNG),

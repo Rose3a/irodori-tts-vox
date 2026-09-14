@@ -1,7 +1,7 @@
 @echo off
 setlocal EnableExtensions
 
-set "ROOT=%~dp0"
+set "ROOT=%~dp0..\"
 set "EDITOR_DIR=%ROOT%voicevox-editor"
 set "LOG=%ROOT%logs\editor-build.log"
 set "TARGET=%EDITOR_DIR%\dist_electron\win-unpacked\kataribe.exe"

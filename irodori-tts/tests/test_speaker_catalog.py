@@ -6,7 +6,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "wrapper"))
 
-from speaker_catalog import FALLBACK_ICON_PATH, credit_for, portrait_for, speaker_catalog, thumbnail_for
+from speaker_catalog import FALLBACK_ICON_PATH, credit_for, policy_for, portrait_for, speaker_catalog, thumbnail_for
 
 
 class SpeakerCatalogTests(unittest.TestCase):
@@ -60,7 +60,26 @@ class SpeakerCatalogTests(unittest.TestCase):
 
             (root / "credits.json").unlink()
             (root / "credit.txt").write_text("イラスト素材：花兎*様\n", encoding="utf-8")
-            self.assertEqual(credit_for(embedding), "イラスト素材：花兎*様")
+            self.assertEqual(policy_for(embedding), "イラスト素材：花兎*様")
+            self.assertIsNone(credit_for(embedding))
+
+    def test_full_notice_wins_and_is_scoped_to_speaker_directory(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            tsukuyomi = root / "tsukuyomi"
+            tsukuyomi.mkdir()
+            other = root / "other"
+            other.mkdir()
+            notice = "音声データのクレジット\n\n【禁止事項】\n■禁止事項の本文"
+            (tsukuyomi / "credits.json").write_text(
+                '{"credit": "イラストのみ"}', encoding="utf-8"
+            )
+            (tsukuyomi / "credit.txt").write_text(notice, encoding="utf-8")
+            self.assertEqual(policy_for(tsukuyomi / "tsukuyomi.speaker.safetensors"), notice)
+            self.assertEqual(credit_for(tsukuyomi / "tsukuyomi.speaker.safetensors"), "イラストのみ")
+            self.assertIsNone(policy_for(other / "other.speaker.safetensors"))
+            (tsukuyomi / "credit.txt").write_text("\n", encoding="utf-8")
+            self.assertEqual(policy_for(tsukuyomi / "tsukuyomi.speaker.safetensors"), "イラストのみ")
 
     def test_recursive_external_speaker_uses_default_icon_and_portrait(self):
         with tempfile.TemporaryDirectory() as temp:

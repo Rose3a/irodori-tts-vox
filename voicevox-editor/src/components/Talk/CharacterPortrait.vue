@@ -314,34 +314,13 @@ const isMultipleEngine = computed(() => store.state.engineIds.length > 1);
 <style scoped lang="scss">
 @use "@/styles/colors" as colors;
 
-.character-name {
-  position: absolute;
-  z-index: 1;
-  left: 0;
-  bottom: 0;
-  padding: 1px 24px 1px 8px;
-  background-image: linear-gradient(
-    90deg,
-    rgba(colors.$background-rgb, 0.5) 0%,
-    rgba(colors.$background-rgb, 0.5) 75%,
-    transparent 100%
-  );
-  overflow-wrap: anywhere;
-}
-
+.character-name,
 .character-engine-name {
-  position: absolute;
-  z-index: 1;
-  left: 0;
+  flex: 0 0 auto;
+  align-self: stretch;
   padding: 1px 24px 1px 8px;
-  background-image: linear-gradient(
-    90deg,
-    rgba(colors.$background-rgb, 0.5) 0%,
-    rgba(colors.$background-rgb, 0.5) 75%,
-    transparent 100%
-  );
-  bottom: 0;
-  transform: translateY(-100%);
+  background-color: colors.$background;
+  color: colors.$display;
   overflow-wrap: anywhere;
 }
 
@@ -362,7 +341,7 @@ const isMultipleEngine = computed(() => store.state.engineIds.length > 1);
     flex: 1 1 auto;
     max-width: 100%;
     max-height: 100%;
-    object-fit: cover;
+    object-fit: contain;
     object-position: center center;
   }
   .character-portrait-empty {
@@ -373,6 +352,9 @@ const isMultipleEngine = computed(() => store.state.engineIds.length > 1);
     background: #fff;
   }
   .character-credit {
+    flex: 0 1 auto;
+    max-height: 25%;
+    overflow-y: auto;
     width: 100%;
     box-sizing: border-box;
     padding: 4px 8px;

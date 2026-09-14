@@ -401,9 +401,8 @@ export const audioStore = createPartialStore<AudioStoreTypes>({
               baseCharacterInfo.portrait,
               "image",
             ),
-            // The engine supplies speaker credits through the standard
-            // speaker_info policy field, which is preserved by OpenAPI.
-            credit: baseCharacterInfo.policy,
+            // Portrait attribution is separate from the full usage policy.
+            credit: baseCharacterInfo.credit,
             metas: {
               speakerUuid: SpeakerId(baseSpeaker.speakerUuid),
               speakerName: baseSpeaker.name,

@@ -32,6 +32,8 @@ export interface SpeakerInfo {
      * @memberof SpeakerInfo
      */
     policy: string;
+    /** Short portrait attribution (Irodori extension). */
+    credit?: string;
     /**
      * 立ち絵画像をbase64エンコードしたもの、あるいはURL
      * @type {string}
@@ -69,6 +71,7 @@ export function SpeakerInfoFromJSONTyped(json: any, ignoreDiscriminator: boolean
     return {
         
         'policy': json['policy'],
+        'credit': typeof json['credit'] === 'string' ? json['credit'] : undefined,
         'portrait': json['portrait'],
         'styleInfos': ((json['style_infos'] as Array<any>).map(StyleInfoFromJSON)),
     };
@@ -84,8 +87,8 @@ export function SpeakerInfoToJSON(value?: SpeakerInfo | null): any {
     return {
         
         'policy': value.policy,
+        'credit': value.credit,
         'portrait': value.portrait,
         'style_infos': ((value.styleInfos as Array<any>).map(StyleInfoToJSON)),
     };
 }
-

@@ -18,11 +18,13 @@ Python 3.11、uv、Node.js、pnpm などのツール類は、初回セットア�
 リポジトリルートで以下を実行します。GPU の検出と、`.local` 配下への環境構築が行われます。
 
 ```bat
-bat\first_setup.bat
-rebuild_and_open_editor.bat
+setup.bat
+open_browser.bat
 ```
 
-`rebuild_and_open_editor.bat` で Editor をソースからビルドして起動します。
+通常は `open_browser.bat` を使用してください。ブラウザ版のエディタとエンジンを起動します。
+
+Electron Editor をソースからビルドして起動する場合は `bat\rebuild_and_open_editor.bat` を使用します。
 
 - バックエンドを手動指定する場合: `bat\first_setup.bat -Backend cuda`
 - 指定可能なオプションの確認: `bat\first_setup.bat -Help`
@@ -65,7 +67,9 @@ WebUI 経由のテスト（セッショントークン、`/audio_query`、`/synt
 
 ### セットアップスクリプトについて
 
-- **`bat\first_setup.bat`（通常はこちらを使用）**:
+- **`setup.bat`（通常はこちらを使用）**:
+  `bat\first_setup.bat` を呼び出し、GPU 判定から `.local` への環境構築を一括で行います。
+- **`bat\first_setup.bat`**:
   `tools\setup.ps1` を呼び出し、GPU 判定から `.local` への環境構築（Python / Node / 依存関係 / モデル準備）を一括で行います。`bat\launch.bat` や `bat\serve_browser.bat` はこの環境を参照します。
 - **`irodori-tts\setup_venv.bat`**:
   ラッパー単体を `irodori-tts\.venv` で動かすためのレガシーなスクリプトです。依存関係の構成が異なるため、通常は使用しません。
