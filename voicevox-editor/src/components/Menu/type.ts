@@ -16,6 +16,7 @@ export type MenuItemRoot = MenuItemBase<"root"> & {
 
 export type MenuItemButton = MenuItemBase<"button"> & {
   onClick: () => void;
+  keepOpenOnClick?: boolean;
   icon?: string;
   disabled?: boolean;
   disableWhenUiLocked: boolean;

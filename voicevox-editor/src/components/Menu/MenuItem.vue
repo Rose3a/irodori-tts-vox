@@ -44,7 +44,7 @@
   <QItem
     v-else
     v-ripple
-    v-close-popup
+    v-close-popup="!menudata.keepOpenOnClick"
     dense
     clickable
     class="bg-background"

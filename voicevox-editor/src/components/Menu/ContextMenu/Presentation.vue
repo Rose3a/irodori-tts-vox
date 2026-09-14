@@ -6,6 +6,7 @@
     :noFocus
     transitionShow="none"
     transitionHide="none"
+    @hide="subMenuOpenFlags = []"
   >
     <QList dense>
       <QItem v-if="header" dense class="bg-background">
@@ -14,6 +15,7 @@
       <MenuItem
         v-for="(menu, index) of menudata"
         :key="index + 1"
+        v-model:selected="subMenuOpenFlags[index]"
         :menudata="menu"
         :disable="
           (menu.type !== 'separator' && menu.disabled) ||
@@ -29,7 +31,7 @@
 import { onMounted, onUnmounted, ref } from "vue";
 import { QMenu } from "quasar";
 import MenuItem from "../MenuItem.vue";
-import type { MenuItemButton, MenuItemSeparator } from "../type";
+import type { MenuItemData } from "../type";
 
 defineProps<{
   header?: string;
@@ -47,6 +49,7 @@ defineExpose({
 });
 
 const contextMenu = ref<QMenu>();
+const subMenuOpenFlags = ref<boolean[]>([]);
 /**
  * コンテキストメニューがフォーカスを奪うかどうかを制御する。
  * 通常はアクセシビリティ考慮のためにフォーカスが移るが、input要素の場合は文字の選択範囲が非表示になってしまう。
@@ -68,5 +71,5 @@ onUnmounted(() => {
   parent.removeEventListener("contextmenu", buttonCapturer);
 });
 
-export type ContextMenuItemData = MenuItemSeparator | MenuItemButton;
+export type ContextMenuItemData = MenuItemData;
 </script>

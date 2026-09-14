@@ -122,7 +122,8 @@
 import { computed, watch, ref, nextTick } from "vue";
 import { QInput } from "quasar";
 import CharacterButton from "@/components/CharacterButton.vue";
-import type { MenuItemButton, MenuItemSeparator } from "@/components/Menu/type";
+import type { MenuItemData } from "@/components/Menu/type";
+import { emojiAnnotationGroups } from "@/domain/emojiAnnotations";
 import ContextMenu from "@/components/Menu/ContextMenu/Container.vue";
 import { useStore } from "@/store";
 import type { AudioKey, SplitTextWhenPasteType, Voice } from "@/type/preload";
@@ -551,17 +552,41 @@ const contextMenu = ref<InstanceType<typeof ContextMenu>>();
 // FIXME: 可能なら`isRangeSelected`と`contextMenuHeader`をcomputedに
 const isRangeSelected = ref(false);
 const contextMenuHeader = ref<string | undefined>("");
-const contextMenudata = ref<
-  [
-    MenuItemButton,
-    MenuItemButton,
-    MenuItemButton,
-    MenuItemSeparator,
-    MenuItemButton,
-    MenuItemSeparator,
-    MenuItemButton,
-  ]
->([
+// メニュー操作中のフォーカス移動に影響されないよう、挿入位置を保存する。
+let emojiInsertionPosition = 0;
+const insertEmojiAnnotation = async (emoji: string) => {
+  if (store.getters.UI_LOCKED) return;
+  const start = emojiInsertionPosition;
+  setAudioTextBuffer(
+    audioTextBuffer.value.slice(0, start) +
+      emoji +
+      audioTextBuffer.value.slice(start),
+  );
+  emojiInsertionPosition = start + emoji.length;
+  await nextTick();
+  textFieldSelection.setCursorPosition(emojiInsertionPosition);
+};
+const contextMenudata = ref<MenuItemData[]>([
+  {
+    type: "root",
+    label: "感情・話し方の絵文字",
+    disableWhenUiLocked: true,
+    subMenu: emojiAnnotationGroups.map((group) => ({
+      type: "root",
+      label: group.label,
+      disableWhenUiLocked: true,
+      subMenu: group.items.map(({ emoji, label }) => ({
+        type: "button",
+        label: emoji + " " + label,
+        keepOpenOnClick: true,
+        disableWhenUiLocked: true,
+        onClick: () => {
+          void insertEmojiAnnotation(emoji);
+        },
+      })),
+    })),
+  },
+  { type: "separator" },
   // NOTE: audioTextBuffer.value の変更が nativeEl.value に反映されるのはnextTick。
   {
     type: "button",
@@ -609,21 +634,6 @@ const contextMenudata = ref<
     },
     disableWhenUiLocked: true,
   },
-  { type: "separator" },
-  {
-    type: "button",
-    label: "読みを変えずに適用",
-    onClick: async () => {
-      contextMenu.value?.hide();
-      isChangeFlag.value = false;
-      await store.actions.COMMAND_CHANGE_DISPLAY_TEXT({
-        audioKey: props.audioKey,
-        text: audioTextBuffer.value,
-      });
-      textField.value?.blur();
-    },
-    disableWhenUiLocked: true,
-  },
 ]);
 /**
  * コンテキストメニューの開閉によりFocusやBlurが発生する可能性のある間は`true`。
@@ -634,6 +644,8 @@ const startContextMenuOperation = () => {
   willFocusOrBlur.value = true;
 };
 const readyForContextMenu = () => {
+  emojiInsertionPosition =
+    textFieldSelection.selectionStart ?? audioTextBuffer.value.length;
   const getMenuItemButton = (label: string) => {
     const item = contextMenudata.value.find((item) => item.label === label);
     if (item?.type !== "button")
