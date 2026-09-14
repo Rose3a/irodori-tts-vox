@@ -60,6 +60,32 @@ Vite 開発サーバー（`bat\serve_browser.bat`）とエンジンを起動し�
 3. ブラウザで http://127.0.0.1:5173/ を開く
 ```
 
+## セッション（トークン）まわりの検証
+
+エンジンを別途起動したうえで:
+
+```bat
+.local\venv\Scripts\python.exe tools\verify_api_auth.py
+```
+
+ローカルAPIの入口を確かめて `logs\verify-api-auth.json` を残す。トークン無しの設定取得・保存が
+403 になること、許可外オリジンにはトークンを渡さないこと、古いトークンが拒否されることを見る。
+
+```bat
+.local\venv\Scripts\python.exe tools\verify_token_recovery.py
+```
+
+ヘッドレス Chrome でエディタを開き、ページ内の実クライアント（`helpers/irodoriEngine.ts` と
+`infrastructures/EngineConnector.ts`）にトークンを取らせてからエンジンを再起動し、
+「古いトークンは 403、クライアントは取り直して成功する」ことを確かめて
+`logs\verify-token-recovery.json` を残す。確認に使う口はトークンが要るものに限ること。
+GET `/speakers` と `/version` は `_authorized()` を通らないので、ここで使うと
+古いトークンでも 200 が返り、成功しても何の証拠にもならない。
+
+どのツールも、エンジン側と同じく `Origin` と `X-Irodori-Session` を付けて叩く。
+`bat\verify.bat`（`tools\verify.py`）も同じ理由でトークンを取ってから
+`/irodori/settings` と `/synthesis` を呼ぶ。
+
 ## 口パク用ASR（/irodori/timeline）
 
 初回の呼び出しでエンジンがモデル（約626MB）を `models\asr` へ自動取得する。

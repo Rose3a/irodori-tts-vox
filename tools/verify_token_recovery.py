@@ -7,6 +7,10 @@
   3. エンジンを再起動する（セッショントークンは起動ごとに変わる）
   4. 古いトークンが 403 になることと、クライアントが取り直して成功することを見る
 
+確認に使う口はトークンを見るものに限る。GET /speakers と /version は _authorized() を
+通らないので、古いトークンでも 200 が返り「取り直した」ことの証拠にならない。
+EngineConnector 側は POST /audio_query（do_POST が認証必須）で確かめる。
+
 結果は logs\\verify-token-recovery.json に残す。
 """
 from __future__ import annotations
@@ -81,7 +85,8 @@ BEFORE_RESTART = f"""
     window.__irodoriHelper = helper;
     window.__irodoriApi = api;
     window.__irodoriTokenBefore = out.tokenBefore;
-    out.speakersBefore = (await api.speakers()).length;
+    // トークンが要る口で叩く。GET /speakers は認証を通らないので使えない。
+    out.queryBefore = (await api.audioQuery({{ text: "こんにちは", speaker: 0 }})) != null;
   }} catch (error) {{
     out.error = String(error);
   }}
@@ -108,7 +113,8 @@ AFTER_RESTART = f"""
     out.helperError = String(error);
   }}
   try {{
-    out.speakersAfter = (await window.__irodoriApi.speakers()).length;
+    // 再起動でトークンが変わっているので、ここは一度 403 になって取り直す経路。
+    out.queryAfter = (await window.__irodoriApi.audioQuery({{ text: "こんにちは", speaker: 0 }})) != null;
   }} catch (error) {{
     out.connectorError = String(error);
   }}
@@ -184,11 +190,12 @@ async def main() -> int:
             report["ok"] = bool(
                 report["mounted"]
                 and report["before"].get("helperBefore")
-                and report["before"].get("speakersBefore", 0) > 0
+                and report["before"].get("queryBefore") is True
                 and after.get("staleTokenStatus") == 403
                 and after.get("helperAfter")
-                and after.get("speakersAfter", 0) > 0
+                and after.get("queryAfter") is True
                 and report["token_changed"]
+                and not report["before"].get("error")
                 and not after.get("helperError")
                 and not after.get("connectorError")
             )

@@ -148,22 +148,58 @@ def _session_token() -> str:
         return json.loads(response.read(4096))["token"]
 
 
-def engine_ready() -> bool:
+class EngineAuthError(RuntimeError):
+    """エンジンは応答したが、Origin かセッショントークンが合わず 403 が返った。"""
+
+
+def _authorized_request(path: str, method: str = "GET", timeout: float = 1.0):
+    """Irodori のエンドポイントは Origin とセッショントークンの両方が要る。
+
+    `/irodori/session` はトークンを配る口なので `_bootstrap_allowed()` しか見ないが、
+    `/irodori/settings` などは `_authorized()` を通る。トークンを付けずに叩くと 403。
+    """
+    token = _session_token()
+    return _request(path, method=method, timeout=timeout,
+                    headers={"Origin": BROWSER_URL, "X-Irodori-Session": token})
+
+
+def _engine_settings(timeout: float = 1.0):
+    """設定を取る。繋がらなければ None、認証が通らなければ EngineAuthError。
+
+    `HTTPError` は `URLError`/`OSError` のサブクラスなので、まとめて捕まえると
+    「エンジンが落ちている」と「セッションが拒否された」の区別が消える。
+    403 は設定のずれなので黙って False にせず投げる。
+    """
     try:
-        with _request("/irodori/settings") as response:
-            return response.status == 200
-    except (OSError, urllib.error.URLError):
+        return _authorized_request("/irodori/settings", timeout=timeout)
+    except urllib.error.HTTPError as exc:
+        if exc.code == 403:
+            raise EngineAuthError(
+                f"engine rejected the editor session (403 {exc.reason}). "
+                f"Check Origin ({BROWSER_URL}) against the engine's ALLOWED_ORIGINS "
+                "and refresh the session token."
+            ) from exc
+        return None
+    except (urllib.error.URLError, ConnectionError, TimeoutError):
+        return None
+
+
+def engine_ready() -> bool:
+    response = _engine_settings()
+    if response is None:
         return False
+    try:
+        return response.status == 200
+    finally:
+        response.close()
 
 
 def shutdown_engine(timeout: float = 3.0) -> bool:
     """Stop the project engine if its identifying endpoint is present."""
-    try:
-        with _request("/irodori/settings", timeout=0.8) as response:
-            if response.status != 200:
-                return False
-    except (OSError, urllib.error.URLError):
+    response = _engine_settings(timeout=0.8)
+    if response is None:
         return False
+    response.close()
     try:
         request = urllib.request.Request(
             f"http://{ENGINE_HOST}:{ENGINE_PORT}/irodori/shutdown", method="POST",
