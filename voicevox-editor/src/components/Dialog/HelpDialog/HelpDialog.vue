@@ -123,7 +123,7 @@ const pagedata = computed(() => {
   const data: PageData[] = [
     {
       type: "item",
-      name: "Irodori-TTS Voxについて",
+      name: "kataribeについて",
       component: MarkdownView,
       props: {
         markdown: ossCommunityInfos.value,

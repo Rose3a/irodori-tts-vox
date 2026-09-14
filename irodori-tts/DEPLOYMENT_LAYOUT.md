@@ -4,8 +4,8 @@
 
 ```text
 Irodori-TTS/
-  frontend/                 # Irodori VOICEVOX Editor の Electron アプリ
-    Irodori VOICEVOX Editor.exe
+  frontend/                 # kataribe の Electron アプリ
+    kataribe.exe
     irodori-engine-path.txt
   backend/                  # このプロジェクトの実行環境
     .venv/

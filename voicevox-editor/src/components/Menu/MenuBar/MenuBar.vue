@@ -80,7 +80,7 @@ const titleText = computed(
   () =>
     (isEdited.value ? "*" : "") +
     (projectName.value != undefined ? projectName.value + " - " : "") +
-    "Irodori VOICEVOX Editor" +
+    "kataribe" +
     (" - Ver. " + getAppInfos().version) +
     (extraVersionInfo ? ` (${extraVersionInfo})` : "") +
     (isMultiEngineOffMode.value ? " - マルチエンジンオフ" : "") +

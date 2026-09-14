@@ -475,7 +475,7 @@ class Handler(BaseHTTPRequestHandler):
                 "brand_name": "Irodori-TTS",
                 "irodori_checkpoint": os.environ.get("IRODORI_CHECKPOINT", ""),
                 "uuid": str(uuid.uuid5(ENGINE_UUID_NAMESPACE, self.adapter.backend_name)),
-                "url": "https://github.com/Rose3a/irodori-tts-vox",
+                "url": "https://github.com/Rose3a/kataribe",
                 "icon": TINY_PNG,
                 "default_sampling_rate": 48000,
                 "frame_rate": 93.75,

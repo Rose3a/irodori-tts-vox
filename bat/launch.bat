@@ -1,2 +1,2 @@
 @echo off
-start "" "%~dp0..\Irodori VOICEVOX Editor.exe"
+start "" "%~dp0..\kataribe.exe"

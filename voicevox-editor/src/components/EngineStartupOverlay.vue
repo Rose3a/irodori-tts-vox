@@ -99,7 +99,7 @@ const reloadAppWithMultiEngineOffMode = () => {
 
 const openQa = () => {
   window.open(
-    "https://github.com/Rose3a/irodori-tts-vox/blob/main/voicevox-editor/public/irodori-qAndA.md",
+    "https://github.com/Rose3a/kataribe/blob/main/voicevox-editor/public/irodori-qAndA.md",
     "_blank",
   );
 };

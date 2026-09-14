@@ -1,12 +1,12 @@
 # 貢献者ガイドライン
 
-Irodori-TTS Vox への提案や不具合報告は、[Rose3a/irodori-tts-vox](https://github.com/Rose3a/irodori-tts-vox) で受け付けます。VOICEVOX公式の窓口へは送らないでください。
+kataribe への提案や不具合報告は、[Rose3a/kataribe](https://github.com/Rose3a/kataribe) で受け付けます。VOICEVOX公式の窓口へは送らないでください。
 
 ## 報告に含める情報
 
 - 実行したバッチファイルまたは操作手順
 - CPU、CUDA、TensorRT、DirectMLのどの実行モードか
-- OSとIrodori-TTS Voxのバージョン
+- OSとkataribeのバージョン
 - 再現手順、期待した結果、実際の結果
 - 関係するログ（ユーザー名やローカルパスなどを除いてください）
 

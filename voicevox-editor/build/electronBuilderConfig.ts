@@ -110,8 +110,8 @@ const builderOptions: ElectronBuilderConfiguration = {
     },
   ],
   // electron-builder installer
-  productName: "Irodori VOICEVOX Editor",
-  appId: "jp.irodori.voicevox",
+  productName: "kataribe",
+  appId: "jp.rose3a.kataribe",
   copyright: "Rose3a and VOICEVOX contributors",
   afterAllArtifactBuild,
   electronFuses: {
@@ -126,7 +126,7 @@ const builderOptions: ElectronBuilderConfiguration = {
     appimage: "1.0.3",
   },
   win: {
-    executableName: "Irodori VOICEVOX Editor",
+    executableName: "kataribe",
     icon: "public/icon.png",
     target: [
       {
@@ -147,7 +147,7 @@ const builderOptions: ElectronBuilderConfiguration = {
   },
   publish: {
     provider: "github",
-    repo: "voicevox",
+    repo: "kataribe",
     vPrefixedTagName: false,
   },
   linux: {

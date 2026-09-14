@@ -15,8 +15,8 @@ class Launcher {
     using (var process = Process.Start(setup)) { process.WaitForExit(); if (process.ExitCode != 0) { Console.WriteLine("Setup failed. See logs\\first-setup.log. Press Enter to close."); Console.ReadLine(); return 1; } }
     string editor = null;
     foreach (var candidate in new[] {
-     Path.Combine(box,"voicevox-editor","dist_electron","win-unpacked","Irodori VOICEVOX Editor.exe"),
-     Path.Combine(box,"voicevox-editor","dist_electron","Irodori VOICEVOX Editor.exe")
+     Path.Combine(box,"voicevox-editor","dist_electron","win-unpacked","kataribe.exe"),
+     Path.Combine(box,"voicevox-editor","dist_electron","kataribe.exe")
     }) if (File.Exists(candidate)) { editor = candidate; break; }
     ProcessStartInfo start;
     if (editor != null) {

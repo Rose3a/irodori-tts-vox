@@ -4,7 +4,7 @@ setlocal EnableExtensions
 set "ROOT=%~dp0"
 set "EDITOR_DIR=%ROOT%voicevox-editor"
 set "LOG=%ROOT%logs\editor-build.log"
-set "TARGET=%EDITOR_DIR%\dist_electron\win-unpacked\Irodori VOICEVOX Editor.exe"
+set "TARGET=%EDITOR_DIR%\dist_electron\win-unpacked\kataribe.exe"
 set "ENGINE_BAT=%ROOT%bat\serve_editor_engine.bat"
 set "ENGINE_LOG=%ROOT%logs\editor-engine-launch.log"
 set "NO_PAUSE=0"

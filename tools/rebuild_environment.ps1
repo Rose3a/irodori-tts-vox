@@ -43,14 +43,14 @@ function Get-ActiveProjectSession {
             $commandLower = $command.ToLowerInvariant()
             if ($process.ProcessId -eq $PID -or $nameLower -in @('powershell.exe', 'pwsh.exe', 'conhost.exe', 'cmd.exe')) { continue }
             if ($commandLower -match 'rebuild_environment\.ps1') { continue }
-            if ($nameLower -eq 'irodori voicevox editor.exe' -or ($commandLower.Contains($rootNeedle) -and ($nameLower -in @('node.exe', 'nodejs.exe', 'python.exe', 'pythonw.exe', 'electron.exe') -or $commandLower -match 'editor_engine\.py|browser_session\.py|vite'))) {
+            if ($nameLower -eq 'kataribe.exe' -or ($commandLower.Contains($rootNeedle) -and ($nameLower -in @('node.exe', 'nodejs.exe', 'python.exe', 'pythonw.exe', 'electron.exe') -or $commandLower -match 'editor_engine\.py|browser_session\.py|vite'))) {
                 $hits.Add("PID $($process.ProcessId): $name $command")
             }
         }
     } catch {
         Write-Warning ("Detailed process command lines were unavailable; using safe name/port checks: " + $_.Exception.Message)
         try {
-            foreach ($process in @(Get-Process -Name 'Irodori VOICEVOX Editor', 'electron' -ErrorAction SilentlyContinue)) {
+            foreach ($process in @(Get-Process -Name 'kataribe', 'electron' -ErrorAction SilentlyContinue)) {
                 $hits.Add("PID $($process.Id): $($process.ProcessName)")
             }
         } catch { Write-Warning 'Fallback process check was unavailable; port checks still apply.' }

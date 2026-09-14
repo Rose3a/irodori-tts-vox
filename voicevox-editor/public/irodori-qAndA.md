@@ -1,4 +1,4 @@
-# Irodori-TTS Vox について
+# kataribe について
 
 ## Q. この画面はVOICEVOX本体ですか？
 

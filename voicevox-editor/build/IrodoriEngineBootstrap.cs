@@ -9,7 +9,7 @@ class EngineBootstrap {
    string box = Directory.GetParent(root).FullName;
    string python = Path.Combine(box,".local","venv","Scripts","python.exe");
    if (!File.Exists(python) || !File.Exists(Path.Combine(box,".local","setup.json"))) {
-    Console.Error.WriteLine("Run Irodori VOICEVOX Editor.exe at the ZIP root to complete first setup."); return 2;
+    Console.Error.WriteLine("Run kataribe.exe at the ZIP root to complete first setup."); return 2;
    }
    foreach(string arg in args) if (arg.Contains("\"") || arg.Contains("\n")) return 2;
    string command = "\"" + Path.Combine(root,"wrapper","editor_engine.py") + "\"";

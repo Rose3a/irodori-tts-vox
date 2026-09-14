@@ -1,5 +1,5 @@
 
-# Irodori TTS Vox
+# kataribe
 
 Windows 向けの Irodori-TTS 実行環境と、Irodori 対応 VOICEVOX Editor のリポジトリです。
 環境の GPU を自動判定し、CUDA / DirectML (Radeon) / CPU の各バックエンドを構成します。
