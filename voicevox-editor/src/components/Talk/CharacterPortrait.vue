@@ -347,7 +347,8 @@ const isMultipleEngine = computed(() => store.state.engineIds.length > 1);
 
 .character-portrait-wrapper {
   position: relative;
-  display: grid;
+  display: flex;
+  flex-direction: column;
   place-items: center;
   width: 100%;
   height: 100%;
@@ -356,7 +357,9 @@ const isMultipleEngine = computed(() => store.state.engineIds.length > 1);
   .character-portrait {
     display: block;
     width: 100%;
-    height: 100%;
+    height: auto;
+    min-height: 0;
+    flex: 1 1 auto;
     max-width: 100%;
     max-height: 100%;
     object-fit: cover;
@@ -364,7 +367,9 @@ const isMultipleEngine = computed(() => store.state.engineIds.length > 1);
   }
   .character-portrait-empty {
     width: 100%;
-    height: 100%;
+    height: auto;
+    min-height: 0;
+    flex: 1 1 auto;
     background: #fff;
   }
   .character-credit {
