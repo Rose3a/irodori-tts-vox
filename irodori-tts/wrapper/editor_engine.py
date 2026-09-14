@@ -34,9 +34,9 @@ from tts_cli import SpeakerCassette, resolve_embed_dirs
 # ダウンロードは続くので、次の要求で揃っていれば使える。
 ASR_DOWNLOAD_WAIT_SECONDS = float(os.environ.get("IRODORI_ASR_WAIT_SECONDS", "45"))
 
-BOX_ROOT = ROOT.parent
-MODEL_DIR = Path(os.environ.get("IRODORI_MODEL_DIR", str(BOX_ROOT / "models")))
-SPEAKER_DIR = Path(os.environ.get("IRODORI_EMBED_DIR", str(BOX_ROOT / "speakers")))
+REPO_ROOT = ROOT.parent
+MODEL_DIR = Path(os.environ.get("IRODORI_MODEL_DIR", str(REPO_ROOT / "models")))
+SPEAKER_DIR = Path(os.environ.get("IRODORI_EMBED_DIR", str(REPO_ROOT / "speakers")))
 
 # Hugging Face のリポジトリID。model.safetensors を含むリポジトリを指定する。
 HF_MODEL_PATTERN = re.compile(
@@ -45,7 +45,7 @@ HF_MODEL_PATTERN = re.compile(
 DEFAULT_STEPS_RF = 8
 DEFAULT_STEPS_MEANFLOW = 4
 # モデル追加ダウンロードも既存のランタイムと同じキャッシュへ置く。
-os.environ.setdefault("IRODORI_HF_HOME", str(BOX_ROOT / ".cache" / "huggingface"))
+os.environ.setdefault("IRODORI_HF_HOME", str(REPO_ROOT / ".cache" / "huggingface"))
 os.environ.setdefault("HF_HOME", os.environ["IRODORI_HF_HOME"])
 
 def _wav_seconds(data):
@@ -127,7 +127,7 @@ class EditorAdapter:
         result["trt"] = (result["cuda"] and importlib.util.find_spec("tensorrt") is not None
                          and torch.cuda.is_bf16_supported()
                          and (ROOT / 'bf16-fallback/fallback_bf16.py').is_file())
-        result["radeon"] = (BOX_ROOT / "work" / "amd-dml-venv").is_dir() and (BOX_ROOT / "work" / "codec_decoder.onnx").is_file()
+        result["radeon"] = (REPO_ROOT / "work" / "amd-dml-venv").is_dir() and (REPO_ROOT / "work" / "codec_decoder.onnx").is_file()
         return result
 
     def models(self):
@@ -137,7 +137,7 @@ class EditorAdapter:
 
     @staticmethod
     def _plan_path():
-        return BOX_ROOT / "irodori-tts" / "bf16-fallback" / "fallback_bf16.plan"
+        return REPO_ROOT / "irodori-tts" / "bf16-fallback" / "fallback_bf16.plan"
 
     @staticmethod
     def _is_hf_model_source(source):
@@ -772,6 +772,8 @@ class EditorHandler(Handler):
     def do_GET(self):
         path = urlparse(self.path).path
         if path == "/irodori/settings":
+            if not self._authorized():
+                return self._json(403, {"detail": "invalid local origin/session"})
             self._json(200, self.adapter.status())
         elif path == "/irodori/timeline" and self._authorized():
             # GET でも使えるように（デバッグ用に ?text= と ?wav= は無し）
@@ -835,7 +837,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
     for key, folder in dict(IRODORI_RUNTIME_DIR="runtime", IRODORI_HF_HOME=".cache/huggingface",
                             IRODORI_CACHE_DIR=".cache/irodori-tts-cache").items():
-        os.environ.setdefault(key, str(BOX_ROOT / folder))
+        os.environ.setdefault(key, str(REPO_ROOT / folder))
     os.environ.setdefault("IRODORI_EMBED_DIR", str(SPEAKER_DIR))
     os.environ.pop("IRODORI_BACKEND", None)
     EditorHandler.adapter = EditorAdapter()

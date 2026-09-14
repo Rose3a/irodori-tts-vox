@@ -21,7 +21,7 @@ from pathlib import Path
 
 BASE = "http://127.0.0.1:50125"
 ORIGIN = "http://localhost:5173"
-OUT = Path(r"D:\hermes\irodori-tts-box\outputs")
+OUT = Path(__file__).resolve().parents[1] / "outputs"
 report: dict = {}
 
 
@@ -92,6 +92,6 @@ if report.get("audio_query_status") == 200:
     else:
         report["synthesis_error"] = str(wav)[:300]
 
-Path(r"D:\hermes\irodori-tts-box\logs\verify-webui.json").write_text(
+(Path(__file__).resolve().parents[1] / "logs" / "verify-webui.json").write_text(
     json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")
 print(json.dumps(report, ensure_ascii=False, indent=2))

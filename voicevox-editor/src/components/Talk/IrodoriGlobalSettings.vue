@@ -139,6 +139,18 @@ import { useStore } from "@/store";
 import { createEngineUrl } from "@/domain/url";
 import { clearAudioCache } from "@/store/audioGenerate";
 import { IRODORI_DEFAULT_STEPS, irodoriDefaultSteps } from "@/domain/irodori";
+import type {
+  IrodoriModelInfo as ModelInfo,
+  IrodoriSettings as Settings,
+  IrodoriStatus as Status,
+} from "@/domain/irodori";
+import {
+  fetchIrodoriStatus,
+  forgetIrodoriSession,
+  openIrodoriFolder,
+  refreshIrodoriSpeakers,
+  saveIrodoriSettings,
+} from "@/helpers/irodoriEngine";
 import type { EngineId } from "@/type/preload";
 const props = defineProps<{ engineId: EngineId }>();
 const store = useStore();
@@ -149,33 +161,6 @@ const defaultSteps = computed(
     irodoriDefaultSteps.value ??
     IRODORI_DEFAULT_STEPS,
 );
-type Settings = {
-  backend: string;
-  model: string;
-  seed: number;
-  sway_coeff: number;
-};
-type ModelInfo = {
-  source: string;
-  kind: "hf" | "local";
-  resolved: string | null;
-  downloaded: boolean;
-  flowParameterization: string;
-  meanflow: boolean;
-  defaultSteps: number;
-  metadataAvailable: boolean;
-  license?: string;
-  licenseUrl?: string;
-};
-type Status = {
-  settings: Settings;
-  loaded: boolean;
-  modelFolder: string;
-  speakerFolder: string;
-  availableBackends: Record<string, boolean>;
-  progress: { active: boolean; percent: number; stage: string };
-  modelInfo?: ModelInfo;
-};
 const settings = ref<Settings>();
 watch(defaultSteps, (value) => {
   irodoriDefaultSteps.value = value;
@@ -253,44 +238,17 @@ const endpoint = computed(() => {
     port: store.state.altPortInfos[props.engineId] ?? info.defaultPort,
   });
 });
-let sessionToken: string | undefined;
-async function authHeaders(json = false): Promise<Record<string, string>> {
-  if (!sessionToken) {
-    const response = await fetch(endpoint.value + "/irodori/session", {
-      signal: AbortSignal.timeout(5000),
-    });
-    if (!response.ok) throw new Error("engine session unavailable");
-    sessionToken = ((await response.json()) as { token: string }).token;
-  }
-  return {
-    ...(json ? { "Content-Type": "application/json" } : {}),
-    "X-Irodori-Session": sessionToken,
-  };
-}
-
-async function request(path: string, value?: Settings): Promise<Status> {
-  const headers = await authHeaders(Boolean(value));
-  const response = await fetch(endpoint.value + path, {
-    method: value ? "POST" : "GET",
-    headers,
-    body: value ? JSON.stringify(value) : undefined,
-    signal: AbortSignal.timeout(30000),
-  });
-  if (!response.ok) {
-    throw new Error(
-      `設定の通信に失敗しました (${response.status}): ${await response.text()}`,
-    );
-  }
-  return response.json() as Promise<Status>;
+/** 設定の保存（save=true）または状態の取得。 */
+async function loadSettings(save: boolean): Promise<Status> {
+  const current = settings.value;
+  return save && current != undefined
+    ? await saveIrodoriSettings(endpoint.value, current)
+    : await fetchIrodoriStatus(endpoint.value);
 }
 
 async function openFolder(folder: "models" | "speakers") {
   try {
-    const response = await fetch(`${endpoint.value}/irodori/open-${folder}`, {
-      method: "POST",
-      headers: await authHeaders(),
-    });
-    if (!response.ok) throw new Error("フォルダを開けませんでした");
+    await openIrodoriFolder(endpoint.value, folder);
   } catch (cause) {
     error.value = cause instanceof Error ? cause.message : String(cause);
   }
@@ -302,10 +260,7 @@ async function run(save: boolean, refreshSpeakers = false) {
   store.mutations.LOCK_UI();
   error.value = "";
   try {
-    const result = await request(
-      "/irodori/settings",
-      save ? settings.value : undefined,
-    );
+    const result = await loadSettings(save);
     settings.value = result.settings;
     progress.value = result.progress;
     modelInfo.value = result.modelInfo ?? modelInfo.value;
@@ -313,11 +268,7 @@ async function run(save: boolean, refreshSpeakers = false) {
     modelFolder.value = result.modelFolder;
     speakerFolder.value = result.speakerFolder;
     if (refreshSpeakers) {
-      const response = await fetch(endpoint.value + "/refresh", {
-        headers: await authHeaders(),
-        signal: AbortSignal.timeout(30000),
-      });
-      if (!response.ok) throw new Error("話者一覧の更新に失敗しました");
+      await refreshIrodoriSpeakers(endpoint.value);
       await store.actions.LOAD_CHARACTER({ engineId: props.engineId });
     }
     if (save || refreshSpeakers) clearAudioCache();
@@ -334,7 +285,7 @@ async function run(save: boolean, refreshSpeakers = false) {
 async function pollStatus() {
   if (busy.value) return;
   try {
-    const result = await request("/irodori/settings");
+    const result = await fetchIrodoriStatus(endpoint.value, 10000);
     progress.value = result.progress;
     if (result.modelInfo) modelInfo.value = result.modelInfo;
   } catch {
@@ -353,7 +304,7 @@ onUnmounted(() => {
 watch(
   () => props.engineId,
   () => {
-    sessionToken = undefined;
+    forgetIrodoriSession();
     settings.value = undefined;
     void run(false);
   },

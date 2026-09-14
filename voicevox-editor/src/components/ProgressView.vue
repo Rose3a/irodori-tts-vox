@@ -35,6 +35,7 @@
 import { computed, onUnmounted, ref, watch } from "vue";
 import { useStore } from "@/store";
 import { createEngineUrl } from "@/domain/url";
+import { fetchIrodoriStatus } from "@/helpers/irodoriEngine";
 
 const store = useStore();
 
@@ -71,13 +72,7 @@ const pollBackendProgress = async () => {
   if (backendPollInFlight || activeEngineUrl.value == undefined) return;
   backendPollInFlight = true;
   try {
-    const response = await fetch(`${activeEngineUrl.value}/irodori/settings`, {
-      signal: AbortSignal.timeout(2000),
-    });
-    if (!response.ok) return;
-    const result = (await response.json()) as {
-      progress?: { active?: boolean; percent?: number; stage?: string };
-    };
+    const result = await fetchIrodoriStatus(activeEngineUrl.value, 2000);
     if (
       result.progress?.active === true &&
       typeof result.progress.percent === "number" &&

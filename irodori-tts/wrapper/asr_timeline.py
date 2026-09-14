@@ -20,8 +20,8 @@ from pathlib import Path
 import numpy as np
 
 ROOT = Path(__file__).resolve().parent.parent  # irodori-tts
-BOX_ROOT = ROOT.parent
-MODEL_DIR = Path(os.environ.get("IRODORI_ASR_DIR", str(BOX_ROOT / "models" / "asr")))
+REPO_ROOT = ROOT.parent
+MODEL_DIR = Path(os.environ.get("IRODORI_ASR_DIR", str(REPO_ROOT / "models" / "asr")))
 MODEL_FILE = MODEL_DIR / "model.int8.onnx"
 TOKENS_FILE = MODEL_DIR / "tokens.txt"
 

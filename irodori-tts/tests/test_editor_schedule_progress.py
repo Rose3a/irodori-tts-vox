@@ -216,12 +216,18 @@ class EditorScheduleProgressTests(unittest.TestCase):
         )
         self.assertRegex(
             PROGRESS_VIEW,
-            r"fetch\([\s\S]{0,240}/irodori/settings",
+            r"import \{ fetchIrodoriStatus \} from \"@/helpers/irodoriEngine\"",
+            "ProgressView must poll through the shared Irodori client (it attaches"
+            " the session token)",
+        )
+        self.assertRegex(
+            PROGRESS_VIEW,
+            r"fetchIrodoriStatus\([\s\S]{0,120}\)",
             "ProgressView must poll the active engine's Irodori settings endpoint",
         )
         self.assertRegex(
             PROGRESS_VIEW,
-            r"setInterval\([\s\S]{0,240}(?:fetch|poll|settings)",
+            r"setInterval\([\s\S]{0,240}(?:pollBackendProgress|fetchIrodoriStatus)",
             "Irodori progress polling must repeat while the overlay is mounted",
         )
 

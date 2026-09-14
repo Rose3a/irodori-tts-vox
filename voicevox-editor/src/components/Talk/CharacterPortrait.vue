@@ -36,10 +36,8 @@ import {
   type MoraStep,
   type TimelineSource,
 } from "@/helpers/portraitLipSync";
-import {
-  fetchAsrTimeline,
-  type AsrTimelineResponse,
-} from "@/helpers/irodoriEngine";
+import { fetchAsrTimeline } from "@/helpers/irodoriEngine";
+import type { AsrTimelineResponse } from "@/domain/irodori";
 import { createEngineUrl } from "@/domain/url";
 import { getAudioDurationSeconds, getPlaybackBlob } from "@/store/audioPlayer";
 import { useStore } from "@/store";

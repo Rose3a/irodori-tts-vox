@@ -12,13 +12,21 @@ export interface IEngineConnectorFactory {
 const OpenAPIEngineConnectorFactoryImpl = (): IEngineConnectorFactory => {
   const instanceMapper: Record<string, DefaultApiInterface> = {};
   const tokenPromises: Record<string, Promise<string>> = {};
-  const sessionToken = (host: string): Promise<string> => {
+  // 起動直後は失敗するので、失敗した約束は握り続けず捨てる。
+  // エンジンの再起動でトークンが変わったときは force で取り直す。
+  const sessionToken = (host: string, force = false): Promise<string> => {
+    if (force) delete tokenPromises[host];
     tokenPromises[host] ??= fetch(`${host}/irodori/session`)
       .then((response) => {
-        if (!response.ok) throw new Error(`engine session unavailable (${response.status})`);
+        if (!response.ok)
+          throw new Error(`engine session unavailable (${response.status})`);
         return response.json() as Promise<{ token: string }>;
       })
-      .then(({ token }) => token);
+      .then(({ token }) => token)
+      .catch((cause: unknown) => {
+        delete tokenPromises[host];
+        throw cause;
+      });
     return tokenPromises[host];
   };
   return {
@@ -27,17 +35,31 @@ const OpenAPIEngineConnectorFactoryImpl = (): IEngineConnectorFactory => {
       if (cached != undefined) {
         return cached;
       }
-      const api = new DefaultApi(new Configuration({
-        basePath: host,
-        fetchApi: async (input, init = {}) => {
-          const url = typeof input === "string" ? input : input.toString();
-          const headers = new Headers(init.headers);
-          if (!url.endsWith("/irodori/session")) {
-            headers.set("X-Irodori-Session", await sessionToken(host));
-          }
-          return fetch(input, { ...init, headers });
-        },
-      }));
+      const api = new DefaultApi(
+        new Configuration({
+          basePath: host,
+          fetchApi: async (input, init = {}) => {
+            const url =
+              typeof input === "string"
+                ? input
+                : input instanceof URL
+                  ? input.href
+                  : input.url;
+            const send = async (token: string) => {
+              const headers = new Headers(init.headers);
+              headers.set("X-Irodori-Session", token);
+              return await fetch(input, { ...init, headers });
+            };
+            if (url.endsWith("/irodori/session")) {
+              return await fetch(input, init);
+            }
+            const response = await send(await sessionToken(host));
+            if (response.status !== 403) return response;
+            // エンジンが再起動するとトークンが変わる。取り直して一度だけやり直す。
+            return await send(await sessionToken(host, true));
+          },
+        }),
+      );
       instanceMapper[host] = api;
 
       return api;

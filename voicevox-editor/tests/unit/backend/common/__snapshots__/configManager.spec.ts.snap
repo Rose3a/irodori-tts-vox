@@ -208,6 +208,10 @@ exports[`0.13.0からマイグレーションできる 1`] = `
     },
   ],
   "inheritAudioInfo": true,
+  "lipSyncBlink": "normal",
+  "lipSyncMode": "simple",
+  "lipSyncSpeed": "normal",
+  "lipSyncTimeline": "mora",
   "openedEditor": "talk",
   "playheadPositionDisplayFormat": "MINUTES_SECONDS",
   "presets": {
