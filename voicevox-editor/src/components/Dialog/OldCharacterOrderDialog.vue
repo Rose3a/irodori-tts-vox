@@ -41,6 +41,9 @@
       >
         <div class="character-portrait-wrapper">
           <img :src="portrait" class="character-portrait" />
+          <div v-if="selectedCharacterInfo?.credit" class="character-credit">
+            {{ selectedCharacterInfo.credit }}
+          </div>
         </div>
       </QDrawer>
 
@@ -131,6 +134,9 @@ const characterInfosMap = computed(() => {
   });
   return map;
 });
+const selectedCharacterInfo = computed(
+  () => characterInfosMap.value[selectedCharacter.value],
+);
 
 // 新しいキャラクター
 const newCharacters = ref<SpeakerId[]>([]);
@@ -269,13 +275,35 @@ const updatePortrait = (portraitPath: string) => {
   min-width: 0;
 }
 .character-portrait-wrapper {
-  display: grid;
-  justify-content: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   width: 100%;
   height: 100%;
   overflow: hidden;
   .character-portrait {
+    display: block;
+    width: 100%;
+    height: auto;
+    min-height: 0;
+    flex: 1 1 auto;
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
     margin: auto;
+  }
+  .character-credit {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 4px 8px;
+    color: #555;
+    background: #fff;
+    font-size: 0.75rem;
+    line-height: 1.35;
+    white-space: pre-line;
+    overflow-wrap: anywhere;
+    text-align: center;
+    flex: none;
   }
 }
 
