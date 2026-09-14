@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import base64
 import io
+import json
 import mimetypes
 from pathlib import Path
 
@@ -132,6 +133,33 @@ def portrait_for(path: Path) -> tuple[str, str] | None:
             mime = "image/png" if image.suffix.lower() == ".png" else (mimetypes.guess_type(image.name)[0] or "image/png")
             return mime, base64.b64encode(image.read_bytes()).decode("ascii")
     return _fallback_icon()
+
+
+def credit_for(path: Path) -> str | None:
+    """Read optional speaker credit metadata from credits.json or credit.txt."""
+    candidates = (path.parent / "credits.json", path.parent / "credit.txt")
+    for metadata in candidates:
+        if not metadata.is_file() or metadata.stat().st_size > 64_000:
+            continue
+        try:
+            if metadata.suffix.lower() == ".json":
+                value = json.loads(metadata.read_text(encoding="utf-8"))
+                if isinstance(value, str):
+                    credit = value.strip()
+                elif isinstance(value, dict):
+                    fields = ("credit", "text", "illustrator", "artist")
+                    values = [str(value[key]).strip() for key in fields
+                              if value.get(key)]
+                    credit = "\n".join(values)
+                else:
+                    credit = ""
+            else:
+                credit = metadata.read_text(encoding="utf-8").strip()
+        except (OSError, UnicodeError, json.JSONDecodeError, TypeError, ValueError):
+            continue
+        if credit:
+            return credit
+    return None
 
 
 def _fallback_icon() -> tuple[str, str] | None:

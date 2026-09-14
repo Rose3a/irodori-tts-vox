@@ -401,6 +401,7 @@ export const audioStore = createPartialStore<AudioStoreTypes>({
               baseCharacterInfo.portrait,
               "image",
             ),
+            credit: baseCharacterInfo.credit,
             metas: {
               speakerUuid: SpeakerId(baseSpeaker.speakerUuid),
               speakerName: baseSpeaker.name,

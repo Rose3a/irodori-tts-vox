@@ -15,6 +15,9 @@
       :alt="characterName"
     />
     <div v-else class="character-portrait-empty" aria-hidden="true"></div>
+    <div v-if="characterInfo?.credit" class="character-credit">
+      {{ characterInfo.credit }}
+    </div>
     <div v-if="isInitializingSpeaker" class="loading">
       <QSpinner color="primary" size="5rem" :thickness="4" />
     </div>
@@ -363,6 +366,18 @@ const isMultipleEngine = computed(() => store.state.engineIds.length > 1);
     width: 100%;
     height: 100%;
     background: #fff;
+  }
+  .character-credit {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 4px 8px;
+    color: #555;
+    background: #fff;
+    font-size: 0.75rem;
+    line-height: 1.35;
+    white-space: pre-line;
+    overflow-wrap: anywhere;
+    text-align: center;
   }
   .loading {
     position: absolute;

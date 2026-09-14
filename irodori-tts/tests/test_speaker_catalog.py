@@ -6,7 +6,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "wrapper"))
 
-from speaker_catalog import FALLBACK_ICON_PATH, portrait_for, speaker_catalog, thumbnail_for
+from speaker_catalog import FALLBACK_ICON_PATH, credit_for, portrait_for, speaker_catalog, thumbnail_for
 
 
 class SpeakerCatalogTests(unittest.TestCase):
@@ -47,6 +47,20 @@ class SpeakerCatalogTests(unittest.TestCase):
                 thumbnail_for(embedding),
                 ("image/png", base64.b64encode(b"icon-payload").decode("ascii")),
             )
+
+    def test_credit_json_and_txt_are_supported(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            embedding = root / "speaker.safetensors"
+            embedding.write_bytes(b"embedding")
+            (root / "credits.json").write_text(
+                '{"credit": "イラスト素材：花兎*様"}', encoding="utf-8"
+            )
+            self.assertEqual(credit_for(embedding), "イラスト素材：花兎*様")
+
+            (root / "credits.json").unlink()
+            (root / "credit.txt").write_text("イラスト素材：花兎*様\n", encoding="utf-8")
+            self.assertEqual(credit_for(embedding), "イラスト素材：花兎*様")
 
     def test_recursive_external_speaker_uses_default_icon_and_portrait(self):
         with tempfile.TemporaryDirectory() as temp:

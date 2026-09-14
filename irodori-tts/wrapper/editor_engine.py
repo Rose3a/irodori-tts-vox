@@ -20,6 +20,7 @@ from voicevox_engine import (Handler, VoicevoxAdapter, ROOT, ENGINE_UUID_NAMESPA
                               TINY_PNG, _query, SESSION_TOKEN, MAX_BODY_BYTES, MAX_TEXT_CHARS)
 from speaker_catalog import (
     _fallback_icon,
+    credit_for,
     blink_thumbnail_for,
     mouth_open_thumbnail_for,
     mouth_parts_for,
@@ -668,12 +669,13 @@ class EditorAdapter:
                 mouth = mouth_open_thumbnail_for(source) if source else None
                 blink = blink_thumbnail_for(source) if source else None
                 mouth_parts = mouth_parts_for(source) if source else None
+                credit = credit_for(source) if source else None
                 speakers_json.append(dict(name=label, speaker_uuid=str(uid),
                     styles=[dict(name="ノーマル", id=sid, type="talk")], version="0.2.0",
                     icon=encoded, portrait=portrait[1] if portrait else encoded,
                     mouth_open=mouth[1] if mouth else None,
                     blink=blink[1] if blink else None,
-                    mouth_parts=mouth_parts))
+                    mouth_parts=mouth_parts, credit=credit))
             with self.state_lock:
                 self.id_to_name = id_to_name
                 self.speakers_json = speakers_json
