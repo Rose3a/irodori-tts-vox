@@ -21,6 +21,33 @@ class SpeakerCatalogTests(unittest.TestCase):
             self.assertEqual(thumbnail_for(embedding), ("image/png", base64.b64encode(b"png-payload").decode("ascii")))
             self.assertEqual(portrait_for(embedding), ("image/png", base64.b64encode(b"png-payload").decode("ascii")))
 
+    def test_icon_directory_wins_over_raster_sidecar(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            embedding = root / "speaker.safetensors"
+            embedding.write_bytes(b"embedding")
+            (root / "icon").mkdir()
+            (root / "icon" / "speaker.png").write_bytes(b"icon-payload")
+            (root / "speaker.png").write_bytes(b"sidecar-payload")
+
+            self.assertEqual(
+                thumbnail_for(embedding),
+                ("image/png", base64.b64encode(b"icon-payload").decode("ascii")),
+            )
+
+    def test_icon_file_next_to_embedding_wins_over_speaker_image(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            embedding = root / "tsukuyomi.speaker.safetensors"
+            embedding.write_bytes(b"embedding")
+            (root / "icon.png").write_bytes(b"icon-payload")
+            (root / "tsukuyomi.png").write_bytes(b"speaker-payload")
+
+            self.assertEqual(
+                thumbnail_for(embedding),
+                ("image/png", base64.b64encode(b"icon-payload").decode("ascii")),
+            )
+
     def test_recursive_external_speaker_uses_default_icon_and_portrait(self):
         with tempfile.TemporaryDirectory() as temp:
             root = Path(temp)

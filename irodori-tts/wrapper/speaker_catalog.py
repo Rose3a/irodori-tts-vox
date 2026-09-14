@@ -18,11 +18,19 @@ def speaker_stem(path: Path) -> str:
 
 
 def thumbnail_for(path: Path) -> tuple[str, str] | None:
-    """Find a raster sidecar, falling back to the bundled SVG icon."""
+    """Find a raster icon/sidecar, falling back to the bundled default."""
     stem = speaker_stem(path)
-    candidates = [path.with_name(stem + ext) for ext in (".png", ".jpg", ".jpeg", ".webp")]
-    candidates = [path.parent / "thumbnails" / (stem + ext) for ext in (".png", ".jpg", ".jpeg", ".webp")] + candidates
-    candidates += [path.with_suffix(ext) for ext in (".png", ".jpg", ".jpeg", ".webp")]
+    extensions = (".png", ".jpg", ".jpeg", ".webp")
+    # A speaker may provide its UI icon in an ``icon`` directory.  Prefer it
+    # over legacy sidecars so custom icons are used when both are present.
+    icon_dirs = (path.parent / "icon", path.parent / stem / "icon")
+    # The common layout keeps ``icon.png`` beside the speaker embedding.
+    candidates = [path.with_name("icon" + ext) for ext in extensions]
+    candidates += [directory / (stem + ext) for directory in icon_dirs for ext in extensions]
+    candidates += [directory / ("icon" + ext) for directory in icon_dirs for ext in extensions]
+    candidates += [path.with_name(stem + ext) for ext in extensions]
+    candidates = [path.parent / "thumbnails" / (stem + ext) for ext in extensions] + candidates
+    candidates += [path.with_suffix(ext) for ext in extensions]
     for image in candidates:
         if image.is_file() and image.stat().st_size <= 2_000_000:
             mime = "image/png"
