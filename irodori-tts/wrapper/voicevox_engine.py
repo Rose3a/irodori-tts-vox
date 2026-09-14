@@ -39,7 +39,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from tts_cli import IrodoriTTS, resolve_embed_dirs  # noqa: E402
 from reading_dictionary import READING_DICTIONARY, make_word
-from speaker_catalog import blink_thumbnail_for, mouth_open_thumbnail_for, mouth_parts_for, portrait_for, speaker_catalog, _fallback_icon  # noqa: E402
+from speaker_catalog import blink_thumbnail_for, credit_for, mouth_open_thumbnail_for, mouth_parts_for, portrait_for, speaker_catalog, _fallback_icon  # noqa: E402
 
 
 ENGINE_VERSION = "0.1.0"
@@ -237,6 +237,7 @@ def _speaker_table(tts: IrodoriTTS, progress_callback=None) -> tuple[list[dict],
         open_mouth = None
         blink = None
         mouth_parts = None
+        credit = None
         if name:
             for directory in tts.embed_dirs:
                 for candidate in Path(directory).rglob("*.safetensors"):
@@ -245,6 +246,7 @@ def _speaker_table(tts: IrodoriTTS, progress_callback=None) -> tuple[list[dict],
                         open_mouth = mouth_open_thumbnail_for(candidate)
                         blink = blink_thumbnail_for(candidate)
                         mouth_parts = mouth_parts_for(candidate)
+                        credit = credit_for(candidate)
                         original = portrait_for(candidate)
                         if original:
                             portrait = original[1]
@@ -262,6 +264,7 @@ def _speaker_table(tts: IrodoriTTS, progress_callback=None) -> tuple[list[dict],
             "blink": blink[1] if blink else None,
             # 母音ごとの口パーツ（任意）
             "mouth_parts": mouth_parts,
+            "credit": credit,
         })
     if progress_callback:
         progress_callback("speaker table ready", 75)
