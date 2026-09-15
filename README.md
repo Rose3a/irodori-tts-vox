@@ -29,6 +29,18 @@ setup.bat
 open_browser.bat
 ```
 
+### TensorRTによる高速化（CUDA環境）
+
+`setup.bat` の完了後、対応する CUDA 環境では `bat\trt_setup.bat` を実行することで、TensorRT による推論の高速化を利用できます。
+
+```bat
+bat\trt_setup.bat
+```
+
+> **注意:** すべての CUDA 対応 GPU での動作を保証するものではありません。未確認の環境もあります。
+>
+> **動作確認済み環境:** RTX 3060（MFモデル / step4）では、約20秒の音声を1秒未満で推論できることを確認しています。
+
 通常は `open_browser.bat` を使用してください。ブラウザ版のエディタとエンジンを起動します。
 
 Electron Editor をソースからビルドして起動する場合は `bat\rebuild_and_open_editor.bat` を使用します。
