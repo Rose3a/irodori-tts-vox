@@ -1,0 +1,18 @@
+{
+  "dacvae": "https://raw.githubusercontent.com/facebookresearch/dacvae/414c20785fc3a28373073ea8ef7a1316eeeaca6e/LICENSE",
+  "descript-audiotools": "https://raw.githubusercontent.com/descriptinc/audiotools/master/LICENSE",
+  "ffmpy": "https://raw.githubusercontent.com/Ch00k/ffmpy/master/LICENSE",
+  "flatbuffers": "https://raw.githubusercontent.com/google/flatbuffers/master/LICENSE",
+  "sentencepiece": "https://raw.githubusercontent.com/google/sentencepiece/v0.1.99/LICENSE",
+  "tokenizers": "https://raw.githubusercontent.com/huggingface/tokenizers/main/LICENSE",
+  "modernbert": "https://huggingface.co/sbintuitions/modernbert-ja-310m/raw/main/LICENSE",
+  "codec": "https://huggingface.co/Aratako/Semantic-DACVAE-Japanese-32dim/raw/47376ee24834d7a05a48ebabfe3cde29b3c5e214/README.md",
+  "pixi-colord": "https://raw.githubusercontent.com/omgovich/colord/master/LICENSE.md",
+  "vue-devtools": "https://raw.githubusercontent.com/vuejs/devtools/main/LICENSE",
+  "isarray": "https://raw.githubusercontent.com/juliangruber/isarray/master/LICENSE",
+  "utaformatix-data": "https://raw.githubusercontent.com/sdercolin/utaformatix-data/main/LICENSE",
+  "sherpa-onnx": "https://pypi.org/project/sherpa-onnx/1.13.8/",
+  "tensorboard": "https://pypi.org/project/tensorboard/2.20.0/",
+  "uv-license-mit": "https://raw.githubusercontent.com/astral-sh/uv/0.9.7/LICENSE-MIT",
+  "uv-license-apache": "https://raw.githubusercontent.com/astral-sh/uv/0.9.7/LICENSE-APACHE"
+}

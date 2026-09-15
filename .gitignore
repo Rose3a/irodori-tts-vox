@@ -4,6 +4,7 @@
 irodori-tts/.venv/
 irodori-tts/.cache/
 voicevox-editor/node_modules/
+voicevox-editor/node_modules.stale-*/
 node_modules/
 .pnpm-store/
 voicevox-editor/dist/

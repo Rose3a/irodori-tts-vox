@@ -20,30 +20,29 @@ class DictionaryTests(unittest.TestCase):
         self.path = Path(self.tmp.name) / "dictionary.json"
         self.dictionary = ReadingDictionary(self.path)
 
-    def test_english_width_and_unknown(self):
+    def test_width_and_english_are_preserved(self):
         self.assertEqual(self.dictionary.convert("Ｈｅｌｌｏ！　world（カタカナ）＋１２３"),
-                         "ハロー! ワールド(カタカナ)+123")
+                         "Hello! world(カタカナ)+123")
         self.assertEqual(self.dictionary.convert("A DMM i love you"),
-                         "エー ディーエムエム アイ ラブ ユー")
+                         "A DMM i love you")
         self.assertEqual(self.dictionary.convert("Irodori github gradio"),
-                         "いろどり ギットハブ グラディオ")
+                         "Irodori github gradio")
         self.assertEqual(self.dictionary.convert("zzzxxyy"), "zzzxxyy")
 
     def test_apostrophe_and_all_caps_tokens_do_not_raise(self):
-        # Letter-by-letter conversion only knows A-Z; apostrophes must fall back.
         for text in ["ROCK'N ROLL", "O'BRIEN さん", "ROCK’N", "DON'T STOP"]:
-            self.assertIsInstance(self.dictionary.convert(text), str)
+            self.assertEqual(self.dictionary.convert(text), text)
 
-    def test_user_entry_beats_longer_or_shorter_builtin(self):
+    def test_user_entry_uses_longest_match(self):
         d = self.dictionary
         d.put(make_word("python3", "パイソンスリー"))
         d.put(make_word("githubactions", "ギットハブアクションズ"))
-        # The user entry is longer than the builtin, so it has to win.
+        # The longer user entry must win.
         self.assertEqual(d.convert("python3"), "パイソンスリー")
         self.assertEqual(d.convert("githubactions"), "ギットハブアクションズ")
-        # Builtins still apply where no user entry matches.
-        self.assertEqual(d.convert("python"), "パイソン")
-        self.assertEqual(d.convert("github"), "ギットハブ")
+        # English remains unchanged unless an explicit user entry matches.
+        self.assertEqual(d.convert("python"), "python")
+        self.assertEqual(d.convert("github"), "github")
 
     def test_override_longest_priority_and_no_cascade(self):
         d = self.dictionary

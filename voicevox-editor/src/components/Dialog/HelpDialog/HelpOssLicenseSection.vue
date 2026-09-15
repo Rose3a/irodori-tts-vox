@@ -104,4 +104,9 @@ const selectLicenseIndex = (index: number | undefined) => {
   flex-direction: column;
   gap: vars.$gap-1;
 }
+
+pre {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
 </style>

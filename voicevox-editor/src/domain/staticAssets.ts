@@ -37,9 +37,12 @@ export const loadPolicyText = async (): Promise<string> => {
 };
 
 export const loadOssLicenses = async (): Promise<OssLicenseInfo[]> => {
-  return ossLicenseInfoSchema
-    .array()
-    .parse(await loadDefault(() => import("../../public/licenses.json")));
+  const groups = await Promise.all([
+    loadDefault(() => import("../../public/licenses.json")),
+    loadDefault(() => import("../../public/dependency-licenses.json")),
+    loadDefault(() => import("../../public/runtime-licenses.json")),
+  ]);
+  return ossLicenseInfoSchema.array().parse(groups.flat());
 };
 
 export const loadUpdateInfos = async (): Promise<UpdateInfo[]> => {

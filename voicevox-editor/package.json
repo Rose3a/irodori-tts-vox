@@ -22,6 +22,7 @@
     "typos": "cross-env ./vendored/typos/typos",
     "// --- tools ---": "",
     "license:generate": "tsx tools/generateLicenses.ts",
+    "license:dependencies": "tsx tools/generateDependencyLicenses.ts",
     "license:merge": "tsx tools/mergeLicenses.ts",
     "check-suspicious-imports": "tsx tools/checkSuspiciousImports.ts",
     "generate-openapi": "tsx tools/generateOpenapi.ts",
@@ -53,7 +54,7 @@
     "preinstall": "npx -y only-allow pnpm",
     "postinstall": "pnpm run postinstall:packages && pnpm run postinstall:download-scripts",
     "postinstall:packages": "install-electron && electron-builder install-app-deps && playwright install chromium",
-    "postinstall:download-scripts": "tsx tools/download7z.ts && tsx tools/downloadTypos.ts",
+    "postinstall:download-scripts": "tsx tools/download7z.ts && tsx tools/downloadTypos.ts && pnpm run license:dependencies",
     "postuninstall": "electron-builder install-app-deps"
   },
   "dependencies": {

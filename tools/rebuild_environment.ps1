@@ -13,6 +13,15 @@ $ErrorActionPreference = 'Stop'
 $box = [IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..'))
 $boxPrefix = $box.TrimEnd('\') + '\'
 
+function Get-Sha256([string]$Path) {
+    $sha = [System.Security.Cryptography.SHA256]::Create()
+    try {
+        $stream = [IO.File]::OpenRead($Path)
+        try { return ([BitConverter]::ToString($sha.ComputeHash($stream))).Replace('-', '') }
+        finally { $stream.Dispose() }
+    } finally { $sha.Dispose() }
+}
+
 function Get-BoxPath([string]$RelativePath) {
     $path = [IO.Path]::GetFullPath((Join-Path $box $RelativePath))
     if (!$path.StartsWith($boxPrefix, [StringComparison]::OrdinalIgnoreCase) -and $path -ne $box.TrimEnd('\')) {
@@ -26,7 +35,7 @@ function Get-ManifestEntry([string]$RelativePath) {
     $item = Get-Item -LiteralPath $path -Force -ErrorAction SilentlyContinue
     $entry = [ordered]@{ path = $RelativePath; fullPath = $path; exists = [bool]$item; kind = if ($item) { if ($item.PSIsContainer) { 'directory' } else { 'file' } } else { $null } }
     if ($item -and !$item.PSIsContainer -and $item.Length -le 1048576 -and $RelativePath -notmatch '(?i)(^|[\/])\.env$') {
-        $entry.sha256 = (Get-FileHash -Algorithm SHA256 -LiteralPath $path).Hash
+        $entry.sha256 = Get-Sha256 $path
         $entry.bytes = $item.Length
     }
     return [pscustomobject]$entry
@@ -105,12 +114,32 @@ if (!$Yes) {
 }
 foreach ($relative in $deleteRelative) {
     $path = Get-BoxPath $relative
-    if (Test-Path -LiteralPath $path) { Write-Host ('Removing ' + $relative); Remove-Item -LiteralPath $path -Recurse -Force } else { Write-Host ('Missing, skipping ' + $relative) }
+    if (Test-Path -LiteralPath $path) {
+        Write-Host ('Removing ' + $relative)
+        if ($relative -eq 'voicevox-editor/node_modules') {
+            # pnpm trees may contain broken or very long paths that fail during
+            # recursive deletion. Move the whole tree aside and let setup create
+            # a fresh node_modules directory.
+            $parent = Split-Path -Parent $path
+            $stale = Join-Path $parent ('node_modules.stale-' + (Get-Date -Format 'yyyyMMdd-HHmmss'))
+            Move-Item -LiteralPath $path -Destination $stale -Force
+            Write-Host ('Moved stale frontend dependencies to ' + $stale)
+            continue
+        }
+        # pnpm can leave dangling entries while a recursive delete is walking
+        # node_modules. Ignore those races, then verify the requested root is gone.
+        Remove-Item -LiteralPath $path -Recurse -Force -ErrorAction SilentlyContinue
+        if (Test-Path -LiteralPath $path) {
+            throw "Failed to remove cleanup target: $relative"
+        }
+    } else { Write-Host ('Missing, skipping ' + $relative) }
 }
 
 $setup = Get-BoxPath 'tools/setup.ps1'
 Write-Host ('Starting existing setup: tools/setup.ps1 -Backend ' + $Backend) -ForegroundColor Cyan
-$setupProcess = Start-Process -FilePath 'powershell.exe' -ArgumentList @('-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', $setup, '-Backend', $Backend) -WorkingDirectory $box -Wait -PassThru
+# Start-Process joins ArgumentList into one string; quote the script path
+# explicitly so a project root containing spaces remains a single argument.
+$setupProcess = Start-Process -FilePath 'powershell.exe' -ArgumentList @('-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', ('"' + $setup + '"'), '-Backend', $Backend) -WorkingDirectory $box -WindowStyle Hidden -Wait -PassThru
 $setupExit = [int]$setupProcess.ExitCode
 Write-Host ('Existing setup exit code: ' + $setupExit)
 exit $setupExit

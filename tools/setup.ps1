@@ -6,6 +6,15 @@ $python = Join-Path $stateDir 'venv\Scripts\python.exe'
 $stateFile = Join-Path $stateDir 'setup.json'
 $frontendAsset = Join-Path $box 'voicevox-editor\node_modules\@quasar\extras\material-icons\material-icons.css'
 
+function Get-Sha256([string]$Path) {
+    $sha = [System.Security.Cryptography.SHA256]::Create()
+    try {
+        $stream = [IO.File]::OpenRead($Path)
+        try { return ([BitConverter]::ToString($sha.ComputeHash($stream))).Replace('-', '') }
+        finally { $stream.Dispose() }
+    } finally { $sha.Dispose() }
+}
+
 function Test-FrontendInstall {
     # Vite can start even when pnpm's links are incomplete, then fails only once
     # the browser imports the missing package.  Check an asset used by main.ts.
@@ -95,7 +104,7 @@ try {
         $line = Get-Content $sumsPath | Where-Object { $_ -match ("\s" + [regex]::Escape($archiveName) + "\s*$") } | Select-Object -First 1
         if (!$line) { throw "Node.js checksum entry not found for $archiveName" }
         $expected = ($line -split '\s+')[0].ToLowerInvariant()
-        $actual = (Get-FileHash -Algorithm SHA256 -LiteralPath $archivePath).Hash.ToLowerInvariant()
+        $actual = (Get-Sha256 $archivePath).ToLowerInvariant()
         if ($actual -ne $expected) { throw "Node.js SHA-256 mismatch for $archiveName" }
         if (Test-Path $extractDir) { Remove-Item -LiteralPath $extractDir -Recurse -Force }
         Expand-Archive -LiteralPath $archivePath -DestinationPath $extractDir -Force
@@ -124,13 +133,15 @@ try {
     Run-Uv @('pip','install','--python',$python,'--no-deps','onnx>=1.16,<2','onnxruntime>=1.24,<2','onnxscript>=0.2','onnx_ir>=0.1')
     $nodeDir = Ensure-PortableNode
     $nodeExe = Join-Path $nodeDir 'node.exe'
-    $npx = Join-Path $nodeDir 'npx.cmd'
+    # Invoke the JS entry point directly so cmd.exe does not reparse the
+    # portable Node path (which can contain spaces or shell metacharacters).
+    $npxCli = Join-Path $nodeDir 'node_modules\npm\bin\npx-cli.js'
     $env:Path = "$nodeDir;$env:Path"
     Write-Host '[EDITOR] Installing frontend dependencies...' -ForegroundColor Cyan
     Push-Location $editorDir
     try {
         # --force recreates pnpm links copied incompletely from another PC/ZIP.
-        & $npx --yes 'pnpm@10.28.2' install --frozen-lockfile --force
+        & $nodeExe $npxCli --yes 'pnpm@10.28.2' install --frozen-lockfile --force
         if ($LASTEXITCODE -ne 0) { throw "pnpm install failed ($LASTEXITCODE)" }
         if (!(Test-FrontendInstall)) {
             throw "Frontend install is incomplete: missing $frontendAsset"
@@ -154,6 +165,11 @@ try {
         & $python (Join-Path $PSScriptRoot 'export_radeon_codec.py')
         if ($LASTEXITCODE -ne 0) { throw 'Radeon ONNX codec export failed. See logs/first-setup.log.' }
     }
+    Write-Host '[LICENSES] Collecting installed runtime notices...'
+    $licenseArgs = @((Join-Path $PSScriptRoot 'generate_runtime_licenses.py'))
+    if ($Backend -eq 'radeon') { $licenseArgs += @('--site-packages', (Join-Path $radeonVenv 'Lib\site-packages')) }
+    & $python @licenseArgs
+    if ($LASTEXITCODE -ne 0) { throw 'Runtime license collection failed.' }
     @{identity=$identity;backend=$Backend;gpu=$gpu;python=$python;completed=[DateTime]::UtcNow.ToString('o')} | ConvertTo-Json | Set-Content -Encoding UTF8 ($stateFile + '.tmp')
     Move-Item -LiteralPath ($stateFile + '.tmp') -Destination $stateFile -Force
     Write-Host 'Setup complete. Starting the editor.'

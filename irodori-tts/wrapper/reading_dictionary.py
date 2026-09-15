@@ -8,37 +8,6 @@ import threading
 import unicodedata
 import uuid
 
-import alkana
-
-LETTER_KANA = dict(zip("ABCDEFGHIJKLMNOPQRSTUVWXYZ", (
-    "エー", "ビー", "シー", "ディー", "イー", "エフ", "ジー", "エイチ",
-    "アイ", "ジェイ", "ケー", "エル", "エム", "エヌ", "オー", "ピー",
-    "キュー", "アール", "エス", "ティー", "ユー", "ブイ", "ダブリュー",
-    "エックス", "ワイ", "ゼット",
-)))
-
-# Common Japanese readings used in the Irodori/VOICEVOX tooling ecosystem.
-# User dictionary entries are applied after these defaults and can override them.
-BUILTIN_READINGS = {
-    "irodori": "いろどり", "voicevox": "ボイスボックス", "github": "ギットハブ",
-    "git": "ギット", "gradio": "グラディオ", "python": "パイソン",
-    "javascript": "ジャバスクリプト", "typescript": "タイプスクリプト",
-    "nodejs": "ノードジェイエス", "node.js": "ノードジェイエス",
-    "npm": "エヌピーエム", "pnpm": "ピーニーピーエム", "api": "エーピーアイ",
-    "ui": "ユーアイ", "gui": "グイ", "cli": "シーエルアイ",
-    "tts": "ティーティーエス", "asr": "エーエスアール", "ai": "エーアイ",
-    "openai": "オープンエーアイ", "chatgpt": "チャットジーピーティー",
-    "huggingface": "ハギングフェイス", "pytorch": "パイトーチ",
-    "cuda": "クーダ", "onnx": "オーエヌエヌエックス", "directml": "ダイレクトエムエル",
-    "tensorRT": "テンソルアールティー", "docker": "ドッカー", "windows": "ウィンドウズ",
-    "browser": "ブラウザー", "chrome": "クローム", "edge": "エッジ",
-    "download": "ダウンロード", "upload": "アップロード", "online": "オンライン",
-    "offline": "オフライン", "login": "ログイン", "logout": "ログアウト",
-    "streaming": "ストリーミング", "software": "ソフトウェア", "hardware": "ハードウェア",
-    "server": "サーバー", "client": "クライアント", "cache": "キャッシュ",
-    "model": "モデル", "prompt": "プロンプト", "token": "トークン",
-}
-
 
 def normalize_width(text):
     # Keep Japanese punctuation and full-width kana intact.
@@ -126,7 +95,7 @@ class ReadingDictionary:
         text = normalize_width(text)
         words = sorted(self.snapshot().values(),
                        key=lambda w: (-len(w["surface"]), -w["priority"]))
-        readings = {normalize_width(key).lower(): value for key, value in BUILTIN_READINGS.items()}
+        readings = {}
         user_surfaces = set()
         for word in words:
             surface = normalize_width(word["surface"]).lower()
@@ -135,28 +104,17 @@ class ReadingDictionary:
             if surface not in user_surfaces:
                 readings[surface] = word["pronunciation"]
                 user_surfaces.add(surface)
-        # One pass: replacements are never passed through the dictionary again.
-        def english(value):
-            def convert(match):
-                token = match[0]
-                # Initialisms and one-letter words are pronounced letter by letter.
-                # Apostrophes and other symbols are not in LETTER_KANA, so only
-                # pure alphabetic tokens may take this path.
-                if token.isalpha() and (len(token) == 1 or token.isupper()):
-                    return ''.join(LETTER_KANA[c.upper()] for c in token)
-                return alkana.get_kana(token.lower()) or token
-            return re.sub(r"[A-Za-z]+(?:['’][A-Za-z]+)?", convert, value)
         if not readings:
-            return english(text)
+            return text
         # Longest key first: Python's alternation keeps the first match, so a
-        # shorter builtin would otherwise swallow a longer user entry.
+        # shorter user entry would otherwise swallow a longer one.
         ordered = sorted(readings, key=len, reverse=True)
         pattern = re.compile('|'.join(re.escape(k) for k in ordered), re.IGNORECASE | re.ASCII)
         result, start = [], 0
         for match in pattern.finditer(text):
-            result.extend((english(text[start:match.start()]), readings[match[0].lower()]))
+            result.extend((text[start:match.start()], readings[match[0].lower()]))
             start = match.end()
-        return ''.join(result) + english(text[start:])
+        return ''.join(result) + text[start:]
 
 
 READING_DICTIONARY = ReadingDictionary(Path(__file__).resolve().parents[2] / "user_dictionary.json")

@@ -1,5 +1,4 @@
 # Runtime/export dependencies for the bundled Irodori source.
-alkana==0.0.3
 huggingface-hub>=0.34
 transformers>=5.12,<6
 torchaudio>=2.10

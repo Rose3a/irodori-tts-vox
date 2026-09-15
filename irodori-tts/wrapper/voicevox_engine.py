@@ -39,6 +39,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from tts_cli import IrodoriTTS, resolve_embed_dirs  # noqa: E402
 from reading_dictionary import READING_DICTIONARY, make_word
+from third_party_licenses import dependency_licenses
 from speaker_catalog import blink_thumbnail_for, credit_for, policy_for, mouth_open_thumbnail_for, mouth_parts_for, portrait_for, speaker_catalog, _fallback_icon  # noqa: E402
 
 
@@ -487,12 +488,7 @@ class Handler(BaseHTTPRequestHandler):
                 "frame_rate": 93.75,
                 "terms_of_service": "",
                 "update_infos": [],
-                "dependency_licenses": [
-                    {"name": "Irodori-TTS", "version": "", "license": "MIT License",
-                     "text": "See runtime/trt-lab/repo/LICENSE (Copyright (c) 2026 Aratako)."},
-                    {"name": "VOICEVOX Editor integration", "version": ENGINE_VERSION,
-                     "license": "LGPL-3.0", "text": "See voicevox-editor/LICENSE and voicevox-editor/LGPL_LICENSE."},
-                ],
+                "dependency_licenses": dependency_licenses(),
                 "supported_features": {
                     "adjust_mora_pitch": False,
                     "adjust_phoneme_length": False,

@@ -1,5 +1,4 @@
 # Torch is installed separately from the selected CPU/CUDA index.
-alkana==0.0.3
 transformers==5.16.1
 huggingface-hub==1.30.0
 safetensors==0.8.0

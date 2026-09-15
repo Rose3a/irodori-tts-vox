@@ -2,6 +2,11 @@
 
 This repository combines original integration code with modified upstream projects. Files retain the license that applies to their source; this notice does not replace any upstream license text.
 
+The application's Help screen reads `voicevox-editor/public/licenses.json`,
+`dependency-licenses.json`, and `runtime-licenses.json`; it does not render this
+Markdown file. See `docs/LICENSE_AUDIT.md` for regeneration steps and unresolved
+distribution questions found in the 2026-09-15 inventory.
+
 ## Source code
 
 | Path | Upstream / copyright | License | Required action when redistributing |
@@ -10,6 +15,25 @@ This repository combines original integration code with modified upstream projec
 | `voicevox-editor/` | VOICEVOX contributors (modified, see below) | LGPL-3.0 or separately obtained license | Keep `voicevox-editor/LICENSE` and `voicevox-editor/LGPL_LICENSE`; provide the corresponding source and preserve notices for modified Editor code. |
 | `voicevox-editor/public/licenses.json` | JavaScript dependencies | Per-package licenses | Regenerate when Editor dependencies change. |
 | `speakers/thumbnails/default-speaker.png` | Original generated fallback asset | Project-owned asset | Used only when a speaker has no portrait image. |
+
+## Optional ASR model for lip sync
+
+The default ASR timeline downloads
+`csukuangfj/sherpa-onnx-nemo-parakeet-tdt_ctc-0.6b-ja-35000-int8`
+at revision `bef18eb066808c90bd0f5df5be685767b0732de8`.
+This is an ONNX / int8 conversion of NVIDIA's
+[parakeet-tdt_ctc-0.6b-ja](https://huggingface.co/nvidia/parakeet-tdt_ctc-0.6b-ja),
+whose model card specifies [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/).
+The conversion's provenance is documented in the
+[sherpa-onnx documentation](https://k2-fsa.github.io/sherpa/onnx/pretrained_models/offline-ctc/nemo/japanese.html).
+The Hugging Face conversion repository has no model card or separate license
+statement; the license above is verified from the original NVIDIA model.
+
+When sharing this model or an adaptation, credit NVIDIA, link the source and
+license, and retain the indication of ONNX conversion / int8 quantization and
+any further changes. CC BY 4.0 permits commercial use and redistribution under
+its terms. This notice describes the default model only; an override through
+`IRODORI_ASR_REPO` must be checked separately.
 
 ## Modifications to upstream code
 

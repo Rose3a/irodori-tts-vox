@@ -1,5 +1,5 @@
 @echo off
-setlocal
+setlocal EnableExtensions DisableDelayedExpansion
 title Irodori-TTS Initial Setup
 call "%~dp0bat\first_setup.bat" %*
 set "SETUP_EXIT=%ERRORLEVEL%"
